@@ -6,13 +6,14 @@ import random
 import time
 from datetime import datetime
 import config
-from sendEmail import SendEmail
+from sendEmail import SendEmail, SendEmailDeploy
 
 client = Client(config.API_KEY, config.API_SECRET, tld='com')
 
 
 while 1:
 
+    SendEmailDeploy()
     now = datetime.now()
     fecha = now.strftime("%d-%m-%y %H:%M:%S")
     lista = client.get_all_tickers()
@@ -26,9 +27,9 @@ while 1:
         tesla.set_interval_as(Interval.INTERVAL_1_HOUR)
         print(i['symbol'])
         try:
-        print(tesla.get_analysis().summary)
+            print(tesla.get_analysis().summary)
         except Exception as e:
-        print("No Data")
+            print("No Data")
         continue
         if((tesla.get_analysis().summary)["RECOMMENDATION"])=="STRONG_BUY":
             print(f" COMPRA FORTE {i}", fecha)

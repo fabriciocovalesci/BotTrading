@@ -85,4 +85,4 @@ while True:
     
   SendEmail(Buy, Sell)
 
-  time.sleep(300)
+  time.sleep(1800)

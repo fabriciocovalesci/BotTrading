@@ -37,7 +37,14 @@ while 1:
         elif((tesla.get_analysis().summary)["RECOMMENDATION"])=="STRONG_SELL":
             print(f" VENDA FORTE {i}", fecha)
             strongSell_list.append(i['symbol'])
-            
-    SendEmail(strongBuy_list, strongSell_list)
+    
+    Buy = strongBuy_list
+    Sell = strongSell_list
+    
+    print(F'Recomendacao de Compra {Buy}')
+
+    print(F'Recomendacao de Venda {Sell}')
+    
+    SendEmail(Buy, Sell)
 
     time.sleep(300)

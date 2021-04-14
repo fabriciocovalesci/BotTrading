@@ -7,7 +7,7 @@ import config
 
 
 def SendEmail(buy, sell):
-    mail_content = F'''Ola,
+    mail_content = F'''Ola ,
         Abaixo segue a relação de criptomoedas, com a recomendação do Trading View
 
         Forte venda: {sell}

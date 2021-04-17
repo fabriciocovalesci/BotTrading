@@ -28,3 +28,4 @@ tzlocal==2.1
 ujson==4.0.2
 urllib3==1.26.4
 zope.interface==5.3.0
+numpy==1.20.0

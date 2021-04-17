@@ -3,7 +3,7 @@ from binance.client import Client
 from binance.enums import *
 import time
 import math
-import datetime
+from datetime import datetime
 import numpy as np
 from sendEmail import *
 
@@ -12,6 +12,9 @@ symbolTicker = 'IOTXUSDT'
 symbolPrice = 0
 ma50 = 0
 auxPrice = 0.0
+
+now = datetime.now()
+
 
 def orderStatus(orderToCkeck):
     try:
@@ -78,8 +81,8 @@ while 1:
         list_of_tickers = client.get_all_tickers()
     except Exception as e:
         with open("ADABTC_scalper.txt", "a") as myfile:
-            myfile.write(str(datetime.datetime.now()) +" - an exception occured - {}".format(e)+ " Oops 1 ! \n")
-            SendEmailERROR(e, str(datetime.datetime.now()))
+            SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S"))
+            myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 1 ! \n")
         client = Client(config.API_KEY, config.API_SECRET, tld='com')
         continue
 
@@ -139,8 +142,8 @@ while 1:
                     list_of_tickers = client.get_all_tickers()
                 except Exception as e:
                     with open("ADABTC_scalper.txt", "a") as myfile:
-                        myfile.write(str(datetime.datetime.now()) +" - an exception occured - {}".format(e)+ " Oops 2 ! \n")
-                        SendEmailERROR(e, str(datetime.datetime.now()))
+                        SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S"))
+                        myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 2 ! \n")
                     client = Client(config.API_KEY, config.API_SECRET, tld='com')
                     continue
 
@@ -159,8 +162,8 @@ while 1:
                         time.sleep(3)
                     except Exception as e:
                         with open("ADABTC_scalper.txt", "a") as myfile:
-                            myfile.write(str(datetime.datetime.now()) +" - an exception occured - {}".format(e)+ "Error Canceling Oops 4 ! \n")
-                            SendEmailERROR(e, str(datetime.datetime.now()))
+                            SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S"))
+                            myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ "Error Canceling Oops 4 ! \n")
                         break
 
 
@@ -192,8 +195,8 @@ while 1:
 
         except Exception as e:
             with open("ADABTC_scalper.txt", "a") as myfile:
-                myfile.write(str(datetime.datetime.now()) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
-                SendEmailERROR(e, str(datetime.datetime.now()))
+                SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S"))
+                myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
             client = Client(config.API_KEY, config.API_SECRET, tld='com')
             print(e)
             orders = client.get_open_orders(symbol=symbolTicker)

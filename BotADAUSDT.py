@@ -81,7 +81,7 @@ while 1:
         list_of_tickers = client.get_all_tickers()
     except Exception as e:
         with open("ADABTC_scalper.txt", "a") as myfile:
-            SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S"))
+            SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
             myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 1 ! \n")
         client = Client(config.API_KEY, config.API_SECRET, tld='com')
         continue
@@ -142,7 +142,7 @@ while 1:
                     list_of_tickers = client.get_all_tickers()
                 except Exception as e:
                     with open("ADABTC_scalper.txt", "a") as myfile:
-                        SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S"))
+                        SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                         myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 2 ! \n")
                     client = Client(config.API_KEY, config.API_SECRET, tld='com')
                     continue
@@ -162,7 +162,7 @@ while 1:
                         time.sleep(3)
                     except Exception as e:
                         with open("ADABTC_scalper.txt", "a") as myfile:
-                            SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S"))
+                            SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                             myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ "Error Canceling Oops 4 ! \n")
                         break
 
@@ -195,7 +195,7 @@ while 1:
 
         except Exception as e:
             with open("ADABTC_scalper.txt", "a") as myfile:
-                SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S"))
+                SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                 myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
             client = Client(config.API_KEY, config.API_SECRET, tld='com')
             print(e)

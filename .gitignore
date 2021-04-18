@@ -112,7 +112,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
+venv/
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -136,3 +136,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+__pycache__
+__pypackages__

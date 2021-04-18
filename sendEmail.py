@@ -2,8 +2,20 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
-import config
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
 
+dotenv_path = join(dirname(__file__), '.env')
+local_env = load_dotenv(dotenv_path)
+
+
+if local_env:
+    GMAIL_EMAIL = os.environ.get("GMAIL_EMAIL")
+    GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
+else:
+    GMAIL_EMAIL = os.environ.get("GMAIL_EMAIL")
+    GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
 
 
 def SendEmail(buy, sell):
@@ -16,8 +28,8 @@ def SendEmail(buy, sell):
         '''
     now = datetime.now()
 
-    sender_address = config.GMAIL_EMAIL
-    sender_pass = config.GMAIL_PASSWORD
+    sender_address = GMAIL_EMAIL
+    sender_pass = GMAIL_PASSWORD
     receiver_address = 'fabcovalesci@gmail.com'
 
     message = MIMEMultipart()
@@ -42,8 +54,8 @@ def SendEmailDeploy():
         '''
     now = datetime.now()
 
-    sender_address = config.GMAIL_EMAIL
-    sender_pass = config.GMAIL_PASSWORD
+    sender_address = GMAIL_EMAIL
+    sender_pass = GMAIL_PASSWORD
     receiver_address = 'fabcovalesci@gmail.com'
     
     message = MIMEMultipart()
@@ -69,8 +81,8 @@ def SendEmailERROR(error, data):
         '''
     now = datetime.now()
 
-    sender_address = config.GMAIL_EMAIL
-    sender_pass = config.GMAIL_PASSWORD
+    sender_address = GMAIL_EMAIL
+    sender_pass = GMAIL_PASSWORD
     receiver_address = 'fabcovalesci@gmail.com'
     
     message = MIMEMultipart()
@@ -97,8 +109,8 @@ def SendEmailBuy(price, buy):
         '''
     now = datetime.now()
 
-    sender_address = config.GMAIL_EMAIL
-    sender_pass = config.GMAIL_PASSWORD
+    sender_address = GMAIL_EMAIL
+    sender_pass = GMAIL_PASSWORD
     receiver_address = 'fabcovalesci@gmail.com'
     
     message = MIMEMultipart()
@@ -124,8 +136,8 @@ def SendEmailSell(price, sell):
         '''
     now = datetime.now()
 
-    sender_address = config.GMAIL_EMAIL
-    sender_pass = config.GMAIL_PASSWORD
+    sender_address = GMAIL_EMAIL
+    sender_pass = GMAIL_PASSWORD
     receiver_address = 'fabcovalesci@gmail.com'
     
     message = MIMEMultipart()

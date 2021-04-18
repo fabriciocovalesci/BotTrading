@@ -5,9 +5,28 @@ import time
 import math
 from datetime import datetime
 import numpy as np
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
 from sendEmail import *
 
-client = Client(config.API_KEY, config.API_SECRET, tld='com')
+dotenv_path = join(dirname(__file__), '.env')
+
+local_env = load_dotenv(dotenv_path)
+
+if local_env:
+    API_KEY = os.environ.get("API_KEY")
+    API_SECRET = os.environ.get("API_SECRET")
+    GMAIL_EMAIL = os.environ.get("GMAIL_EMAIL")
+    GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
+else:
+    API_KEY = os.environ.get("API_KEY")
+    API_SECRET = os.environ.get("API_SECRET")
+    GMAIL_EMAIL = os.environ.get("GMAIL_EMAIL")
+    GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
+
+
+client = Client(API_KEY, API_SECRET, tld='com')
 symbolTicker = 'NANOUSDT'
 symbolPrice = 0
 ma50 = 0
@@ -129,7 +148,7 @@ while 1:
         with open("ADABTC_scalper.txt", "a") as myfile:
             SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
             myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 1 ! \n")
-        client = Client(config.API_KEY, config.API_SECRET, tld='com')
+        client = Client(API_KEY, API_SECRET, tld='com')
         continue
 
     for tick_2 in list_of_tickers:
@@ -150,7 +169,7 @@ while 1:
         orders = client.get_open_orders(symbol=symbolTicker)
     except Exception as e:
         print(e)
-        client = Client(config.API_KEY, config.API_SECRET, tld='com')
+        client = Client(API_KEY, API_SECRET, tld='com')
         continue
 
     if (len(orders) != 0):
@@ -195,7 +214,7 @@ while 1:
                     with open("ADABTC_scalper.txt", "a") as myfile:
                         SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                         myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 2 ! \n")
-                    client = Client(config.API_KEY, config.API_SECRET, tld='com')
+                    client = Client(API_KEY, API_SECRET, tld='com')
                     continue
 
                 for tick_2 in list_of_tickers:
@@ -256,7 +275,7 @@ while 1:
             with open("ADABTC_scalper.txt", "a") as myfile:
                 SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                 myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
-            client = Client(config.API_KEY, config.API_SECRET, tld='com')
+            client = Client(API_KEY, API_SECRET, tld='com')
             print(e)
             orders = client.get_open_orders(symbol=symbolTicker)
             if (len(orders)>0):

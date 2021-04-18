@@ -13,7 +13,23 @@ symbolPrice = 0
 ma50 = 0
 auxPrice = 0.0
 
+
+# Percente For Buy
+percentePriceBUY = 1.0055
+percentePriceStopBUY =  1.005
+
+
+# Percente For Sell
+percentagePriceSELL = 1.080
+percentageStopPriceSELL = 1.048
+percentagestopLimitPriceSELL = 1.050
+
+
 now = datetime.now()
+
+
+def formatForPrice(priceToFormat, percente):
+    return '{:.8f}'.format(round(float(priceToFormat*percente),8))
 
 
 def orderStatus(orderToCkeck):
@@ -122,16 +138,19 @@ while 1:
         print("DINAMIC_BUY")
 
         try:
+            
+            priceBuy = formatForPrice(symbolPrice, percentePriceBUY)
+            stopPriceBuy = formatForPrice(symbolPrice, percentePriceStopBUY)
 
             buyOrder = client.create_order(
                         symbol=symbolTicker,
                         side='BUY',
                         type='STOP_LOSS_LIMIT',
-                        quantity=10,
-                        price='{:.8f}'.format(round(symbolPrice*1.0055,8)),
-                        stopPrice='{:.8f}'.format(round(symbolPrice*1.005,8)),
+                        quantity=250,
+                        price=priceBuy,
+                        stopPrice=stopPriceBuy,
                         timeInForce='GTC')
-            SendEmailBuy(symbolPrice*1.0055, buyOrder)
+            SendEmailBuy(priceBuy, buyOrder)
 
             auxPrice = symbolPrice
             time.sleep(3)
@@ -166,30 +185,36 @@ while 1:
                             myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ "Error Canceling Oops 4 ! \n")
                         break
 
+                    priceBuy = formatForPrice(symbolPrice, percentePriceBUY)
+                    stopPriceBuy = formatForPrice(symbolPrice, percentePriceStopBUY)
 
                     buyOrder = client.create_order(
                                 symbol=symbolTicker,
                                 side='BUY',
                                 type='STOP_LOSS_LIMIT',
-                                quantity=10,
-                                price='{:.8f}'.format(round(symbolPrice*1.0055,8)),
-                                stopPrice='{:.8f}'.format(round(symbolPrice*1.005,8)),
+                                quantity=250,
+                                price=priceBuy,
+                                stopPrice=stopPriceBuy,
                                 timeInForce='GTC')
                     auxPrice = symbolPrice
-                    SendEmailBuy(symbolPrice*1.0055, buyOrder)
+                    SendEmailBuy(priceBuy, buyOrder)
                     time.sleep(1)
 
             time.sleep(10)
+            
+            priceSell = formatForPrice(symbolPrice, percentagePriceSELL)
+            stopPriceSell = formatForPrice(symbolPrice, percentageStopPriceSELL)
+            stopLimitPriceSell = formatForPrice(symbolPrice, percentagestopLimitPriceSELL)
 
             orderOCO = client.order_oco_sell(
                         symbol = symbolTicker,
-                        quantity = 10,
-                        price = '{:.8f}'.format(round(float(symbolPrice)*1.02,8)),
-                        stopPrice = '{:.8f}'.format(round(float(symbolPrice)*0.992,8)),
-                        stopLimitPrice ='{:.8f}'.format(round(float(symbolPrice)*0.99,8)),
+                        quantity = 250,
+                        price = priceSell,
+                        stopPrice = stopPriceSell,
+                        stopLimitPrice =stopLimitPriceSell,
                         stopLimitTimeInForce = 'GTC'
                     )
-            SendEmailSell(symbolPrice*1.02, orderOCO)
+            SendEmailSell(priceSell, orderOCO)
 
             time.sleep(20)
 

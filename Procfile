@@ -1,1 +1,1 @@
-worker: python BotADAUSDT.py
+worker: python Bot.py

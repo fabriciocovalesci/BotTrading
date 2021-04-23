@@ -100,12 +100,10 @@ def SendEmailERROR(error, data):
     print('Mail Sent')
     
     
-def SendEmailBuy(price, buy):
-    mail_content = F'''Compra efetuada com sucesso !!! ,
-        Valor comprado: {price}
+def SendEmailBuy():
+    mail_content = f'''Compra efetuada com sucesso !!! ,
         
-        Order ID: {buy.get('orderId')}
-        Data {data}
+        
         '''
     now = datetime.now()
 
@@ -128,11 +126,9 @@ def SendEmailBuy(price, buy):
     print('Mail Sent')
     
     
-def SendEmailSell(price, sell):
-    mail_content = F'''Venda efetuada com sucesso !!! ,
-        Valor Vendido: {price}
+def SendEmailSell():
+    mail_content = f'''Venda efetuada com sucesso !!! ,
         
-        Sell: {sell}
         '''
     now = datetime.now()
 
@@ -143,7 +139,7 @@ def SendEmailSell(price, sell):
     message = MIMEMultipart()
     message['From'] = sender_address
     message['To'] = receiver_address
-    message['Subject'] = F'BOT - CRIPTOMOEDAS - {now.strftime("%d-%m-%y %H:%M:%S")}' 
+    message['Subject'] = f'BOT - CRIPTOMOEDAS - {now.strftime("%d-%m-%y %H:%M:%S")}' 
 
     message.attach(MIMEText(mail_content, 'plain'))
     session = smtplib.SMTP('smtp.gmail.com', 587) 

@@ -1,7 +1,6 @@
 from binance.client import Client
 from binance.enums import *
 import time
-import math
 from datetime import datetime
 import numpy as np
 import os
@@ -26,15 +25,16 @@ else:
 
 
 client = Client(API_KEY, API_SECRET, tld='com')
-symbolTicker = 'NANOUSDT'
+symbolTicker = 'XRPUSDT'
+symbolBase = 'XRP'
 symbolPrice = 0
 ma50 = 0
 auxPrice = 0.0
 
 
 # Percente For Buy
-percentePriceBUY = 1.0055
-percentePriceStopBUY =  1.005
+percentePriceBUY = 1.0045
+percentePriceStopBUY = 1.005
 
 
 # Percente For Sell
@@ -48,8 +48,35 @@ now = datetime.now()
 
 
 def formatForPrice(priceToFormat, percente):
-    return '{:.8f}'.format(round(float(priceToFormat*percente),8))
+    """
+    This function returns a price formatted to 8 decimal places
+    
+    :params priceToFormat:
+    :params percente:
+    
+    :type priceToFormat: str
+    :type percente: float
+    
+    returns a formatted price, already with a percentage added
+    """
+    return '{:.8f}'.format(round(float(priceToFormat*percente),4))
 
+
+def check_balance(symbol):
+    """
+    This function returns a Boolean value
+    
+    :params symbol:
+    
+    :type symbol: str
+    
+    returns a bool, True if there is a symbol in the wallet and False if there is no symbol
+    """
+    balance = client.get_asset_balance(asset=symbol)
+    get_price = float(balance['free'])
+    if get_price == 0.0:
+        return False
+    return True
 
 
 def calculate_price_buy(crypto):
@@ -91,7 +118,7 @@ def orderStatus(orderToCkeck):
         print(e)
         return 7
 
-def _tendencia_ma50_4hs_15minCandles_():
+def tendencia_ma50_4hs_15minCandles():
     x = []
     y = []
     sum = 0
@@ -120,7 +147,7 @@ def _tendencia_ma50_4hs_15minCandles_():
 
     return resp
 
-def _ma50_():
+def calculate_ma50():
     ma50_local = 0
     sum = 0
 
@@ -136,15 +163,19 @@ def _ma50_():
     return ma50_local
 
 while 1:
+    
+    statusSymbol = check_balance(symbolBase)
+    print(f"Status {symbolBase} - {statusSymbol}")
 
     time.sleep(3)
     sum = 0
 
     # BEGIN GET PRICE
+    client = Client(API_KEY, API_SECRET, tld='com')
     try:
         list_of_tickers = client.get_all_tickers()
     except Exception as e:
-        with open("ADABTC_scalper.txt", "a") as myfile:
+        with open("Error_Bot.txt", "a") as myfile:
             SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
             myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 1 ! \n")
         client = Client(API_KEY, API_SECRET, tld='com')
@@ -155,7 +186,7 @@ while 1:
             symbolPrice = float(tick_2['price'])
     # END GET PRICE
 
-    ma50 = _ma50_()
+    ma50 = calculate_ma50()
     if (ma50 == 0): continue
 
     print("********** " + symbolTicker + " **********")
@@ -175,7 +206,7 @@ while 1:
         print("There is Open Orders")
         time.sleep(20)
         continue
-    if (not _tendencia_ma50_4hs_15minCandles_()):
+    if (not tendencia_ma50_4hs_15minCandles()):
         print("Decreasing")
         time.sleep(20)
         continue
@@ -191,6 +222,13 @@ while 1:
             stopPriceBuy = formatForPrice(symbolPrice, percentePriceStopBUY)
             quantityBuy = calculate_price_buy(symbolTicker)
             quantitySell = quantityBuy
+            
+            print('=========================================')
+            print('priceBuy ', priceBuy)
+            print('stopPriceBuy ', stopPriceBuy)
+            print('quantityBuy ', quantityBuy)
+            print('quantitySell ', quantitySell)
+            print('=========================================')
 
             buyOrder = client.create_order(
                         symbol=symbolTicker,
@@ -200,17 +238,19 @@ while 1:
                         price=priceBuy,
                         stopPrice=stopPriceBuy,
                         timeInForce='GTC')
-            SendEmailBuy(priceBuy, buyOrder)
+            SendEmailBuy()
+            print("orderStatus(buyOrder) ", orderStatus(buyOrder))
 
             auxPrice = symbolPrice
             time.sleep(3)
+            
             while orderStatus(buyOrder)=='NEW':
-
+                client = Client(API_KEY, API_SECRET, tld='com')
                 # BEGIN GET PRICE
                 try:
                     list_of_tickers = client.get_all_tickers()
                 except Exception as e:
-                    with open("ADABTC_scalper.txt", "a") as myfile:
+                    with open("Error_Bot.txt", "a") as myfile:
                         SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                         myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 2 ! \n")
                     client = Client(API_KEY, API_SECRET, tld='com')
@@ -230,7 +270,7 @@ while 1:
 
                         time.sleep(3)
                     except Exception as e:
-                        with open("ADABTC_scalper.txt", "a") as myfile:
+                        with open("Error_Bot.txt", "a") as myfile:
                             SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                             myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ "Error Canceling Oops 4 ! \n")
                         break
@@ -244,12 +284,12 @@ while 1:
                                 symbol=symbolTicker,
                                 side='BUY',
                                 type='STOP_LOSS_LIMIT',
-                                quantity=250,
+                                quantity=quantityBuy,
                                 price=priceBuy,
                                 stopPrice=stopPriceBuy,
                                 timeInForce='GTC')
                     auxPrice = symbolPrice
-                    SendEmailBuy(priceBuy, buyOrder)
+                    SendEmailBuy()
                     time.sleep(1)
 
             time.sleep(10)
@@ -266,12 +306,12 @@ while 1:
                         stopLimitPrice =stopLimitPriceSell,
                         stopLimitTimeInForce = 'GTC'
                     )
-            SendEmailSell(priceSell, orderOCO)
+            SendEmailSell()
 
             time.sleep(20)
 
         except Exception as e:
-            with open("ADABTC_scalper.txt", "a") as myfile:
+            with open("Error_Bot.txt", "a") as myfile:
                 SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                 myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
             client = Client(API_KEY, API_SECRET, tld='com')

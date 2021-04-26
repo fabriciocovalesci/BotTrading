@@ -24,7 +24,6 @@ regex==2021.4.4
 requests==2.25.1
 service-identity==18.1.0
 six==1.15.0
-TA-Lib==0.4.19
 tradingview-ta==3.2.3
 Twisted==21.2.0
 txaio==21.2.1

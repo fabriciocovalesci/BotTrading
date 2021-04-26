@@ -10,17 +10,21 @@ dateparser==1.0.0
 hyperlink==21.0.0
 idna==2.10
 incremental==21.3.0
+numpy==1.20.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.20
+pymongo==3.11.3
 pyOpenSSL==20.0.1
 python-binance==0.7.10
 python-dateutil==2.8.1
+python-dotenv==0.17.0
 pytz==2021.1
 regex==2021.4.4
 requests==2.25.1
 service-identity==18.1.0
 six==1.15.0
+TA-Lib==0.4.19
 tradingview-ta==3.2.3
 Twisted==21.2.0
 txaio==21.2.1
@@ -28,5 +32,3 @@ tzlocal==2.1
 ujson==4.0.2
 urllib3==1.26.4
 zope.interface==5.3.0
-numpy==1.20.0
-python-dotenv==0.17.0

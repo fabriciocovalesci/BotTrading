@@ -101,7 +101,7 @@ def formatForPrice(priceToFormat, percente):
     
     returns a formatted price, already with a percentage added
     """
-    return '{:.8f}'.format(round(float(priceToFormat*percente),4))
+    return '{:.8f}'.format(round(float(priceToFormat*percente),8))
 
 
 def check_balance(symbol, client):

@@ -1,4 +1,4 @@
-from binance.client import Client
+from binance.client import Client, BinanceAPIException
 from binance.enums import *
 import time
 from datetime import datetime
@@ -35,8 +35,8 @@ auxPrice = 0.0
 
 
 # Percente For Buy
-percentePriceBUY = 1.0045
-percentePriceStopBUY = 1.005
+percentePriceBUY = 1.002
+percentePriceStopBUY = 1.003
 
 
 # Percente For Sell
@@ -56,9 +56,11 @@ while True:
         checke_symbol_price = check_balance(symbolBase, client)
         list_of_tickers = client.get_all_tickers()
             
-    except Exception as e:
-      print(f'An exception occurred {e}')
-      continue
+    except BinanceAPIException as e:
+        print(f'An exception occurred {e}')
+        print(f"status {e.status_code}")
+        print(f'Message {e.message}')
+        continue
 
     if checke_symbol_price['status'] == True:
         print(f"Has account balance - current balance{checke_symbol_price['price']}")
@@ -76,14 +78,11 @@ while True:
         print(f"Current value of {symbolTicker} - {symbolPrice}")
             
         ma50 = calculate_ma50(symbolTicker, client)
-        print('ma50 ', ma50)
+        print('ma50 ', round(ma50, 4))
+        print('Tendencia ', tendencia_ma50_4hs_15minCandles(symbolTicker, client))
         if (ma50 == 0): continue
-
-        print("********** " + symbolTicker + " **********")
-        print(" ActualMA50: "  + str(round(ma50,8)))
-        print("ActualPrice: " + str(round(symbolPrice,8)))
-        print(" PriceToBuy: "  + str(round(ma50*0.99,8)))
-        print("----------------------")
+        
+        show_updated_prices(symbolTicker, ma50, symbolPrice)
         
         try:
             orders = client.get_open_orders(symbol=symbolTicker)
@@ -108,8 +107,8 @@ while True:
             
             try:
             
-                priceBuy = formatForPrice(symbolPrice, percentePriceBUY)
-                stopPriceBuy = formatForPrice(symbolPrice, percentePriceStopBUY)
+                priceBuy = format_Price_decimal_percente(symbolPrice, percentePriceBUY, 4)
+                stopPriceBuy = format_Price_decimal_percente(symbolPrice, percentePriceStopBUY, 4)
                 quantityBuy = calculate_price_buy(symbolTicker, client)
                 quantitySell = quantityBuy
                 
@@ -159,8 +158,8 @@ while True:
                                 myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ "Error Canceling Oops 4 ! \n")
                             break
 
-                        priceBuy = formatForPrice(symbolPrice, percentePriceBUY)
-                        stopPriceBuy = formatForPrice(symbolPrice, percentePriceStopBUY)
+                        priceBuy = format_Price_decimal_percente(symbolPrice, percentePriceBUY, 4)
+                        stopPriceBuy = format_Price_decimal_percente(symbolPrice, percentePriceStopBUY, 4)      
                         quantityBuy = calculate_price_buy(symbolTicker, client)
                         quantitySell = quantityBuy
 
@@ -171,9 +170,9 @@ while True:
 
                 time.sleep(10)
                 
-                priceSell = formatForPrice(symbolPrice, percentagePriceSELL)
-                stopPriceSell = formatForPrice(symbolPrice, percentageStopPriceSELL)
-                stopLimitPriceSell = formatForPrice(symbolPrice, percentagestopLimitPriceSELL)
+                priceSell = format_Price_decimal_percente(symbolPrice, percentagePriceSELL, 4)
+                stopPriceSell = format_Price_decimal_percente(symbolPrice, percentageStopPriceSELL, 4)
+                stopLimitPriceSell = format_Price_decimal_percente(symbolPrice, percentagestopLimitPriceSELL, 4)
 
                 orderOCO = sell_order_OCO(client, symbolTicker, quantitySell, priceSell, stopPriceSell, stopLimitPriceSell)
                 SendEmailSell()

@@ -89,7 +89,7 @@ def calculate_price_buy(crypto, client):
         return quantity
     
     
-def formatForPrice(priceToFormat, percente):
+def format_Price_decimal_percente(priceToFormat, percente, decimal) -> float:
     """
     This function returns a price formatted to 8 decimal places
     
@@ -101,7 +101,9 @@ def formatForPrice(priceToFormat, percente):
     
     returns a formatted price, already with a percentage added
     """
-    return '{:.8f}'.format(round(float(priceToFormat*percente),8))
+    price = float(priceToFormat)
+    result = price*percente
+    return f"{round(float(result),decimal)}"
 
 
 def check_balance(symbol, client):
@@ -180,3 +182,47 @@ def sell_order_OCO(client, symbolTicker, quantitySell, priceSell, stopPriceSell,
         stopLimitPrice =stopLimitPriceSell,
         stopLimitTimeInForce = 'GTC')
     return orderOCO
+
+
+def get_price_ticker(symbol, client):
+  """
+  This function returns the price of the symbol
+  
+  :params symbol:
+  :params client:
+  
+  :type symbol: str
+  :type client: Binance instance client
+  
+  return a price in float
+  """
+  list_of_tickers = client.get_all_tickers()
+  for tick in list_of_tickers:
+    if tick['symbol'] == symbol:
+      symbolPrice = float(tick['price'])
+      break
+  return symbolPrice
+
+
+
+def show_updated_prices(symbolTicker,ma50, symbolPrice):
+    """
+    This function displays prices
+    
+    :params symbolTicker:
+    :params ma50:
+    :params symbolPrice:
+    
+    :type symbolTicker: str
+    :type ma50: float
+    :type symbolPrice: str
+    """
+    print("********** " + symbolTicker + " **********")
+    print(" ActualMA50: "  + str(round(ma50,4)))
+    print("ActualPrice: " + str(round(symbolPrice,4)))
+    print(" PriceToBuy: "  + str(round(ma50*0.99,4)))
+    print("----------------------")
+    
+
+def formatForPriceDecimal(priceToFormat, decimal):
+    return  f"{round(float(priceToFormat), decimal)}"

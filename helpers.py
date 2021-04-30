@@ -226,3 +226,31 @@ def show_updated_prices(symbolTicker,ma50, symbolPrice):
 
 def formatForPriceDecimal(priceToFormat, decimal):
     return  f"{round(float(priceToFormat), decimal)}"
+
+
+def Dinamic_Buy():
+    while True:
+        priceBuy = format_Price_decimal_percente(symbolPrice, percentePriceBUY, 4)
+        stopPriceBuy = format_Price_decimal_percente(symbolPrice, percentePriceStopBUY, 4)
+        quantityBuy = calculate_price_buy(symbolTicker, client)
+        quantitySell = quantityBuy
+                
+    
+
+def signal_for_sell(percenteSell: float, list_all_tickers: list, symbolTicker: str, priceCompare: float) -> bool:
+    """ This function compares the price that was purchased with the current price of the asset
+
+    Args:
+        percenteSell (float): [Percentage of sale]
+        list_all_tickers (list): [List with all assets]
+        symbolTicker (str): [Tick ​​base]
+        priceCompare (float): [price that was bought active]
+
+    Returns:
+        bool: Boolean return signaling sale
+    """
+    result = list(filter(lambda tick : (tick['symbol'] == symbolTicker), list_all_tickers))
+    price_compare_buy = float(format_Price_decimal_percente(priceCompare, percenteSell, 4))
+    if price_compare_buy < float(result[0]['price']):
+        return True
+    return False

@@ -32,6 +32,7 @@ symbolPrice = 0
 priceBuy = 0
 ma50 = 0
 auxPrice = 0.0
+priceCompare = 1.3375
 
 
 # Percente For Buy
@@ -62,10 +63,22 @@ while True:
         print(f'Message {e.message}')
         continue
 
-    if checke_symbol_price['status'] == True:
-        print(f"Has account balance - current balance{checke_symbol_price['price']}")
-        time.sleep(20)
-    else:
+    if checke_symbol_price['status'] == True and float(checke_symbol_price['price']) >= 10.00:
+        time.sleep(15)
+        print(f"status {checke_symbol_price['price']}")
+        if signal_for_sell(percentagePriceSELL, list_of_tickers, symbolTicker, priceCompare):
+            print('venda confirmada......')
+        
+            priceSell = format_Price_decimal_percente(str(symbolPrice), percentagePriceSELL, 4)
+            stopPriceSell = format_Price_decimal_percente(str(symbolPrice), percentageStopPriceSELL, 4)
+            stopLimitPriceSell = format_Price_decimal_percente(str(symbolPrice), percentagestopLimitPriceSELL, 4)
+
+            # orderOCO = sell_order_OCO(client, symbolTicker, quantitySell, priceSell, stopPriceSell, stopLimitPriceSell)
+            # SendEmailSell()
+        continue
+            
+            
+    elif float(checke_symbol_price['price']) < 1.00:
         print(f"No account balance {checke_symbol_price['price']}")
         time.sleep(5)
             
@@ -86,8 +99,9 @@ while True:
         
         try:
             orders = client.get_open_orders(symbol=symbolTicker)
-        except Exception as e:
-            print(e)
+        except BinanceAPIException as e:
+            print(f"status {e.status_code}")
+            print(f'Message {e.message}')
             client = Client(API_KEY, API_SECRET, tld='com')
             continue
         
@@ -120,7 +134,7 @@ while True:
                 print('=========================================')
 
                 buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
-
+                priceCompare = priceBuy
                 SendEmailBuy()
                 print("orderStatus(buyOrder) ", orderStatus(buyOrder, client))
 
@@ -132,7 +146,7 @@ while True:
                     # BEGIN GET PRICE
                     try:
                         list_of_tickers = client.get_all_tickers()
-                    except Exception as e:
+                    except BinanceAPIException as e:
                         with open("Error_Bot.txt", "a") as myfile:
                             SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                             myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 2 ! \n")
@@ -152,7 +166,7 @@ while True:
                                 orderId=buyOrder.get('orderId'))
 
                             time.sleep(3)
-                        except Exception as e:
+                        except BinanceAPIException as e:
                             with open("Error_Bot.txt", "a") as myfile:
                                 SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                                 myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ "Error Canceling Oops 4 ! \n")
@@ -165,6 +179,7 @@ while True:
 
                         buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
                         auxPrice = symbolPrice
+                        priceCompare = priceBuy
                         SendEmailBuy()
                         time.sleep(1)
 
@@ -179,7 +194,7 @@ while True:
 
                 time.sleep(20)
 
-            except Exception as e:
+            except BinanceAPIException as e:
                 with open("Error_Bot.txt", "a") as myfile:
                     SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                     myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")

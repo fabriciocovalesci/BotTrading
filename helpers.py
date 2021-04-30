@@ -254,3 +254,19 @@ def signal_for_sell(percenteSell: float, list_all_tickers: list, symbolTicker: s
     if price_compare_buy < float(result[0]['price']):
         return True
     return False
+
+
+def get_price_current(list_all_tickers: list, symbolTicker: str) -> float:
+    """[This function returns the current price of an asset]
+
+    Args:
+        list_all_tickers (list): [List with all assets]
+        symbolTicker (str): [Tick ​​base]
+
+    Returns:
+        float: [returns the current price]
+    """
+    
+    result = list(filter(lambda tick : (tick['symbol'] == symbolTicker), list_all_tickers))
+    return round(float(result[0]['price']), 4)
+    

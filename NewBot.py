@@ -83,11 +83,9 @@ while True:
         time.sleep(5)
             
         get_price = client.get_asset_balance(asset=symbolBase)
-            
-        for tick_2 in list_of_tickers:
-            if tick_2['symbol'] == symbolTicker:
-                symbolPrice = float(tick_2['price'])
-            
+        
+        symbolPrice = get_price_current(list_of_tickers, symbolTicker)
+                    
         print(f"Current value of {symbolTicker} - {symbolPrice}")
             
         ma50 = calculate_ma50(symbolTicker, client)
@@ -152,10 +150,8 @@ while True:
                             myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 2 ! \n")
                         client = Client(API_KEY, API_SECRET, tld='com')
                         continue
-
-                    for tick_2 in list_of_tickers:
-                        if tick_2['symbol'] == symbolTicker:
-                            symbolPrice = float(tick_2['price'])
+                    
+                    symbolPrice = get_price_current(list_of_tickers, symbolTicker)
                     # END GET PRICE
 
                     if (symbolPrice < auxPrice):

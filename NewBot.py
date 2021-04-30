@@ -73,8 +73,8 @@ while True:
             stopPriceSell = format_Price_decimal_percente(str(symbolPrice), percentageStopPriceSELL, 4)
             stopLimitPriceSell = format_Price_decimal_percente(str(symbolPrice), percentagestopLimitPriceSELL, 4)
 
-            # orderOCO = sell_order_OCO(client, symbolTicker, quantitySell, priceSell, stopPriceSell, stopLimitPriceSell)
-            # SendEmailSell()
+            orderOCO = sell_order_OCO(client, symbolTicker, quantitySell, priceSell, stopPriceSell, stopLimitPriceSell)
+            SendEmailSell()
         continue
             
             

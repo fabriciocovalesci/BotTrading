@@ -69,10 +69,11 @@ while True:
     if checke_symbol_price['status'] == True and round(float(price_current_XRPUSDT), 4) >= 10.50:
         print(f"Account Balance .... {round(float(price_current_XRPUSDT), 4)} USDT")
         print(f"The Amount {int(checke_symbol_price['price'])} XRP for sale")
-        time.sleep(15)
+        time.sleep(20)
         
         if signal_for_sell(percentagePriceSELL, list_of_tickers, symbolTicker, priceCompare):
             print('\t\t____Confirmed Sale____')
+            time.sleep(20)
             
             symbolPriceSale = get_price_current(list_of_tickers, symbolTicker)
             priceSell = format_Price_decimal_percente(str(symbolPriceSale), percentagePriceSELL, 4)
@@ -83,7 +84,7 @@ while True:
             orderOCO = sell_order_OCO(client, symbolTicker, quantitysell, priceSell, stopPriceSell, stopLimitPriceSell)
             
             SendEmailSell(orderOCO, str(now.strftime("%d-%m-%y %H:%M:%S")))
-            time.sleep(10)
+            time.sleep(15)
         continue
             
             

@@ -26,24 +26,25 @@ else:
 
 
 client = Client(API_KEY, API_SECRET, tld='com')
-symbolTicker = 'XRPUSDT' # 'DGBUSDT'
-symbolBase = 'XRP' #'DGB'
+symbolTicker = 'XRPUSDT'
+symbolBase = 'XRP'
 symbolPrice = 0
 priceBuy = 0
 ma50 = 0
 auxPrice = 0.0
-priceCompare = 1.3375
+priceCompare = 1.5999
 
 
 # Percente For Buy
-percentePriceBUY = 1.002
-percentePriceStopBUY = 1.003
+percentePriceBUY = 1.001
+percentePriceStopBUY = 1.002
 
 
 # Percente For Sell
-percentagePriceSELL = 1.080
-percentageStopPriceSELL = 1.048
-percentagestopLimitPriceSELL = 1.050
+percentagePriceSELL = 1.02
+percentageStopPriceSELL = 0.992
+percentagestopLimitPriceSELL = 0.99
+
 
 quantitySell = 0
 
@@ -63,22 +64,29 @@ while True:
         print(f'Message {e.message}')
         continue
 
-    if checke_symbol_price['status'] == True and float(checke_symbol_price['price']) >= 10.00:
+    symbolPrice_current = get_price_current(list_of_tickers, symbolTicker)
+    price_current_XRPUSDT = (symbolPrice_current*float(checke_symbol_price['price']))
+    if checke_symbol_price['status'] == True and round(float(price_current_XRPUSDT), 4) >= 10.50:
+        print(f"Account Balance .... {round(float(price_current_XRPUSDT), 4)} USDT")
+        print(f"The Amount {int(checke_symbol_price['price'])} XRP for sale")
         time.sleep(15)
-        print(f"status {checke_symbol_price['price']}")
-        if signal_for_sell(percentagePriceSELL, list_of_tickers, symbolTicker, priceCompare):
-            print('venda confirmada......')
         
-            # priceSell = format_Price_decimal_percente(str(symbolPrice), percentagePriceSELL, 4)
-            # stopPriceSell = format_Price_decimal_percente(str(symbolPrice), percentageStopPriceSELL, 4)
-            # stopLimitPriceSell = format_Price_decimal_percente(str(symbolPrice), percentagestopLimitPriceSELL, 4)
-
-            # orderOCO = sell_order_OCO(client, symbolTicker, quantitySell, priceSell, stopPriceSell, stopLimitPriceSell)
-            # SendEmailSell()
+        if signal_for_sell(percentagePriceSELL, list_of_tickers, symbolTicker, priceCompare):
+            print('\t\t____Confirmed Sale____')
+            
+            priceSell = format_Price_decimal_percente(str(symbolPrice), percentagePriceSELL, 4)
+            stopPriceSell = format_Price_decimal_percente(str(symbolPrice), percentageStopPriceSELL, 4)
+            stopLimitPriceSell = format_Price_decimal_percente(str(symbolPrice), percentagestopLimitPriceSELL, 4)
+            quantitysell = int(checke_symbol_price['price'])
+            
+            orderOCO = sell_order_OCO(client, symbolTicker, quantitysell, priceSell, stopPriceSell, stopLimitPriceSell)
+            
+            SendEmailSell(orderOCO, str(now.strftime("%d-%m-%y %H:%M:%S")))
+            time.sleep(10)
         continue
             
             
-    elif float(checke_symbol_price['price']) < 1.00:
+    elif float(checke_symbol_price['price']) < 3.00:
         print(f"No account balance {checke_symbol_price['price']}")
         time.sleep(5)
             
@@ -114,79 +122,22 @@ while True:
         else:
             print("Creasing")
 
-        if ( symbolPrice < ma50*0.99 ):
+        if ( symbolPrice < ma50*0.999 ):
             print("DINAMIC_BUY")
             
             try:
-            
-                priceBuy = format_Price_decimal_percente(symbolPrice, percentePriceBUY, 4)
-                stopPriceBuy = format_Price_decimal_percente(symbolPrice, percentePriceStopBUY, 4)
-                quantityBuy = calculate_price_buy(symbolTicker, client)
-                quantitySell = quantityBuy
-                
-                print('=========================================')
-                print('priceBuy ', priceBuy)
-                print('stopPriceBuy ', stopPriceBuy)
-                print('quantityBuy ', quantityBuy)
-                print('quantitySell ', quantitySell)
-                print('=========================================')
+                client = Client(API_KEY, API_SECRET, tld='com')
+                symbolPrice = Dinamic_Buy(symbolTicker, symbolBase, client, percentePriceBUY, percentePriceStopBUY)
+                SendEmailBuy(symbolPrice, str(now.strftime("%d-%m-%y %H:%M:%S")))
 
-                buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
-                priceCompare = priceBuy
-                SendEmailBuy()
-                print("orderStatus(buyOrder) ", orderStatus(buyOrder, client))
-
-                auxPrice = symbolPrice
-                time.sleep(3)
-                
-                while orderStatus(buyOrder, client)=='NEW':
-                    client = Client(API_KEY, API_SECRET, tld='com')
-                    # BEGIN GET PRICE
-                    try:
-                        list_of_tickers = client.get_all_tickers()
-                    except BinanceAPIException as e:
-                        with open("Error_Bot.txt", "a") as myfile:
-                            SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
-                            myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 2 ! \n")
-                        client = Client(API_KEY, API_SECRET, tld='com')
-                        continue
-                    
-                    symbolPrice = get_price_current(list_of_tickers, symbolTicker)
-                    # END GET PRICE
-
-                    if (symbolPrice < auxPrice):
-
-                        try:
-                            result = client.cancel_order(
-                                symbol=symbolTicker,
-                                orderId=buyOrder.get('orderId'))
-
-                            time.sleep(3)
-                        except BinanceAPIException as e:
-                            with open("Error_Bot.txt", "a") as myfile:
-                                SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
-                                myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ "Error Canceling Oops 4 ! \n")
-                            break
-
-                        priceBuy = format_Price_decimal_percente(symbolPrice, percentePriceBUY, 4)
-                        stopPriceBuy = format_Price_decimal_percente(symbolPrice, percentePriceStopBUY, 4)      
-                        quantityBuy = calculate_price_buy(symbolTicker, client)
-                        quantitySell = quantityBuy
-
-                        buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
-                        auxPrice = symbolPrice
-                        priceCompare = priceBuy
-                        SendEmailBuy()
-                        time.sleep(1)
-
-                time.sleep(10)
+                time.sleep(20)
                 
                 priceSell = format_Price_decimal_percente(symbolPrice, percentagePriceSELL, 4)
                 stopPriceSell = format_Price_decimal_percente(symbolPrice, percentageStopPriceSELL, 4)
                 stopLimitPriceSell = format_Price_decimal_percente(symbolPrice, percentagestopLimitPriceSELL, 4)
 
                 orderOCO = sell_order_OCO(client, symbolTicker, quantitySell, priceSell, stopPriceSell, stopLimitPriceSell)
-                SendEmailSell()
+                SendEmailSell(orderOCO, str(now.strftime("%d-%m-%y %H:%M:%S")))
 
                 time.sleep(20)
 

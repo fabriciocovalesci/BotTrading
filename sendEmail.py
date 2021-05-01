@@ -100,9 +100,11 @@ def SendEmailERROR(error, data):
     print('Mail Sent')
     
     
-def SendEmailBuy():
+def SendEmailBuy(priceBuy, date):
     mail_content = f'''Compra efetuada com sucesso !!! ,
         
+        Valor comprado: {priceBuy}
+        Data: {date}
         
         '''
     now = datetime.now()
@@ -126,9 +128,11 @@ def SendEmailBuy():
     print('Mail Sent')
     
     
-def SendEmailSell():
+def SendEmailSell(orderSell, date):
     mail_content = f'''Venda efetuada com sucesso !!! ,
         
+        Order Venda: {orderSell}
+        Data: {date}
         '''
     now = datetime.now()
 

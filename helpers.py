@@ -1,4 +1,4 @@
-from binance.client import Client
+from binance.client import Client, BinanceAPIException
 from binance.enums import *
 import time
 import numpy as np
@@ -74,14 +74,14 @@ def calculate_price_buy(crypto, client):
     current_price = client.get_symbol_ticker(symbol=crypto)
     get_price = float(current_price['price'])
     
-    if get_price >= 10.0 and get_price <= 20.0:
+    if get_price >= 10.50 and get_price <= 20.0:
         print(f'Current price bigger then 10, price {get_price} USDT | Buy quantity 1')
         return 1
-    elif get_price <= 10.0:
+    elif get_price <= 10.50:
         quantity = 1
         while True:
             quantity_current = get_price * quantity
-            if quantity_current < 10.0:
+            if quantity_current < 10.50:
                 quantity +=1
                 continue
             break
@@ -228,7 +228,7 @@ def formatForPriceDecimal(priceToFormat, decimal):
     return  f"{round(float(priceToFormat), decimal)}"
 
 
-def Dinamic_Buy():
+def Dinamic_Buy1():
     while True:
         priceBuy = format_Price_decimal_percente(symbolPrice, percentePriceBUY, 4)
         stopPriceBuy = format_Price_decimal_percente(symbolPrice, percentePriceStopBUY, 4)
@@ -241,10 +241,10 @@ def signal_for_sell(percenteSell: float, list_all_tickers: list, symbolTicker: s
     """ This function compares the price that was purchased with the current price of the asset
 
     Args:
-        percenteSell (float): [Percentage of sale]
-        list_all_tickers (list): [List with all assets]
-        symbolTicker (str): [Tick ​​base]
-        priceCompare (float): [price that was bought active]
+        percenteSell (float): Percentage of sale
+        list_all_tickers (list): List with all assets
+        symbolTicker (str): Tick ​​base
+        priceCompare (float): price that was bought active
 
     Returns:
         bool: Boolean return signaling sale
@@ -257,16 +257,96 @@ def signal_for_sell(percenteSell: float, list_all_tickers: list, symbolTicker: s
 
 
 def get_price_current(list_all_tickers: list, symbolTicker: str) -> float:
-    """[This function returns the current price of an asset]
+    """This function returns the current price of an asset
 
     Args:
-        list_all_tickers (list): [List with all assets]
-        symbolTicker (str): [Tick ​​base]
+        list_all_tickers (list): List with all assets
+        symbolTicker (str): Tick ​​base
 
     Returns:
-        float: [returns the current price]
+        float: returns the current price
     """
     
     result = list(filter(lambda tick : (tick['symbol'] == symbolTicker), list_all_tickers))
     return round(float(result[0]['price']), 4)
     
+
+
+def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePriceBUY: float, percentePriceStopBUY: float ) -> float:
+    """This function returns a purchase value. Buying is dynamic, always trying to get the lowest price.
+
+    Args:
+        symbolTicker (str): cryptocurrency par symbol
+        symbolBase (str): symbol of a single asset. EX: XRP
+        client (object): Binance instance client
+        percentePriceBUY (float): Percentage to purchase
+        percentePriceStopBUY (float): Percentage to stop buying limit
+
+    Returns:
+        float: Returns the purchased amount
+    """
+
+    try:
+        list_of_tickers = client.get_all_tickers()
+        prev_symbolPrice = get_price_current(list_of_tickers, symbolTicker)
+        quantityBuy = calculate_price_buy(symbolTicker, client)
+        priceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceBUY, 4)
+        stopPriceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceStopBUY, 4)
+        quantityBuy = calculate_price_buy(symbolTicker, client)
+        quantitySell = quantityBuy
+
+        # buy order
+        buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
+        status_list = client.get_all_orders(symbol=symbolTicker, orderId=buyOrder['orderId'])
+        status = ''
+        for get_status in status_list:
+            if get_status['status'] == 'NEW':
+                status = get_status['status']
+                break
+
+    except BinanceAPIException as e:
+        print (e.status_code)
+        print (e.message)
+    
+
+    while status == "NEW":
+        checke_symbol_price = check_balance(symbolBase, client)
+        
+        print('status while ' , status)
+
+        print(f"Balance in account {checke_symbol_price['price']}")
+        time.sleep(5)
+
+        list_of_tickers = client.get_all_tickers()
+        current_symbolPrice = get_price_current(list_of_tickers, symbolTicker)
+
+        print("    Prev Price = " + str(prev_symbolPrice))
+        print(" Current Price = " + str(current_symbolPrice))
+
+        if ( prev_symbolPrice > current_symbolPrice):
+
+            result = client.cancel_order(
+                symbol = symbolTicker,
+                orderId = buyOrder.get('orderId')
+            )
+
+            quantityBuy = calculate_price_buy(symbolTicker, client)
+            priceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceBUY, 4)
+            stopPriceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceStopBUY, 4)
+            quantityBuy = calculate_price_buy(symbolTicker, client)
+            quantitySell = quantityBuy
+
+            # buy order
+            buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
+            status_list = client.get_all_orders(symbol=symbolTicker, orderId=buyOrder['orderId'])
+            status = ''
+            for get_status in status_list:
+                if get_status['status'] == 'NEW':
+                    status = get_status['status']
+                    break
+            prev_symbolPrice = current_symbolPrice
+            if status == "NEW":
+                continue
+
+    print(f"{symbolTicker} purchased value {prev_symbolPrice}")
+    return prev_symbolPrice

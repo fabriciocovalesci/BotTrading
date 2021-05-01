@@ -74,9 +74,10 @@ while True:
         if signal_for_sell(percentagePriceSELL, list_of_tickers, symbolTicker, priceCompare):
             print('\t\t____Confirmed Sale____')
             
-            priceSell = format_Price_decimal_percente(str(symbolPrice), percentagePriceSELL, 4)
-            stopPriceSell = format_Price_decimal_percente(str(symbolPrice), percentageStopPriceSELL, 4)
-            stopLimitPriceSell = format_Price_decimal_percente(str(symbolPrice), percentagestopLimitPriceSELL, 4)
+            symbolPriceSale = get_price_current(list_of_tickers, symbolTicker)
+            priceSell = format_Price_decimal_percente(str(symbolPriceSale), percentagePriceSELL, 4)
+            stopPriceSell = format_Price_decimal_percente(str(symbolPriceSale), percentageStopPriceSELL, 4)
+            stopLimitPriceSell = format_Price_decimal_percente(str(symbolPriceSale), percentagestopLimitPriceSELL, 4)
             quantitysell = int(checke_symbol_price['price'])
             
             orderOCO = sell_order_OCO(client, symbolTicker, quantitysell, priceSell, stopPriceSell, stopLimitPriceSell)

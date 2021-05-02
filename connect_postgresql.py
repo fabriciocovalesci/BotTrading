@@ -17,63 +17,116 @@ if local_env:
     POSTGRESQL_PORT = os.environ.get("POSTGRESQL_PORT")
 
 
-try:
-    connection = psycopg2.connect(user=POSTGRESQL_USER,
-                                  password=POSTGRESQL_PASSWORD,
-                                  host=POSTGRESQL_HOST,
-                                  port=POSTGRESQL_PORT,
-                                  database=POSTGRESQL_DATABASE)
+class Config:
+    def __init__(self):
+        self.config = {
+            "postgres" : {
+                "user": POSTGRESQL_USER,
+                "password": POSTGRESQL_PASSWORD,
+                "host": POSTGRESQL_HOST,
+                "port": POSTGRESQL_PORT,
+                "database": POSTGRESQL_DATABASE
+            }
+        }
 
-    cursor = connection.cursor()
+class Connection(Config):
+    def __init__(self):
+        Config.__init__(self)
+        try:
+            self.conn = psycopg2.connect(**self.config["postgres"])
+            self.cur = self.conn.cursor()
+
+        except (Exception, Error) as error:
+            print(f"Connection error {error}")
+            exit(1)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.commit()
+        self.connection.close()
+
+    @property
+    def connection(self):
+        return self.conn
+
+    @property
+    def cursor(self):
+        return self.cur
+
+    def commit(self):
+        self.connection.commit()
+
+    def fetchall(self):
+        return self.cursor.fetchall()
+
+    def execute(self, sql, params=None):
+        self.cursor.execute(sql, params or ())
+
+    def query(self, sql, params=None):
+        self.cursor.execute(sql, params or ())
+        return self.fetchall()
 
 
-    create_table_query_sell = '''CREATE TABLE IF NOT EXISTS Sell
-    (id_sell SERIAL PRIMARY KEY,
-    date_sell DATE,
-    quantity INTEGER DEFAULT 0,
-    current_price NUMERIC (10, 2),
-    paired_symbol VARCHAR(50),
-    symbol_base VARCHAR(50),
-    amount NUMERIC (10, 2),
-    id_report INTEGER,
-    id_buy INTEGER,
-    FOREIGN KEY(id_report) REFERENCES Reports (id_report),
-    FOREIGN KEY(id_buy) REFERENCES Buy (id_buy));'''
+class Buy(Connection):
+    def __init__(self):
+        Connection.__init__(self)
+
+        create_table_query_buy = '''CREATE TABLE IF NOT EXISTS Buy
+            (id_buy SERIAL PRIMARY KEY,
+            amount NUMERIC (10, 2),
+            date_buy DATE,
+            quantity INTEGER DEFAULT 0,
+            order_id VARCHAR(50),
+            current_price NUMERIC (10, 2),
+            paired_symbol VARCHAR(50),
+            symbol_base VARCHAR(50),
+            id_report INTEGER,
+            FOREIGN KEY(id_report) REFERENCES Reports (id_report));'''
+        self.execute(create_table_query_buy)
+        self.commit()
 
 
-    create_table_query_buy = '''CREATE TABLE IF NOT EXISTS Buy
-    (id_buy SERIAL PRIMARY KEY,
-    amount NUMERIC (10, 2),
-    date_buy DATE,
-    quantity INTEGER,
-    order_id VARCHAR(50),
-    current_price NUMERIC (10, 2),
-    paired_symbol VARCHAR(50),
-    symbol_base VARCHAR(50),
-    id_report INTEGER,
-    FOREIGN KEY(id_report) REFERENCES Reports (id_report));'''
+class Sell(Connection):
+    def __init__(self):
+        Connection.__init__(self)
+
+        create_table_query_sell = '''CREATE TABLE IF NOT EXISTS Sell
+            (id_sell SERIAL PRIMARY KEY,
+            date_sell DATE,
+            quantity INTEGER DEFAULT 0,
+            current_price NUMERIC (10, 2),
+            paired_symbol VARCHAR(50),
+            symbol_base VARCHAR(50),
+            amount NUMERIC ,
+            id_report INTEGER,
+            id_buy INTEGER,
+            FOREIGN KEY(id_report) REFERENCES Reports (id_report),
+            FOREIGN KEY(id_buy) REFERENCES Buy (id_buy));'''
+        self.execute(create_table_query_sell)
+        self.commit()
+
+class Reports(Connection):
+    def __init__(self):
+        Connection.__init__(self)
+
+        create_table_query_reports = '''CREATE TABLE IF NOT EXISTS Reports
+            (id_report SERIAL PRIMARY KEY,
+            amount_buy NUMERIC (10, 2) DEFAULT 0.000,
+            profit INTEGER DEFAULT 0,
+            amount_sell NUMERIC (10, 2) DEFAULT 0.000,
+            quantity INTEGER DEFAULT 0,
+            paired_symbol VARCHAR(50));'''
+        self.execute(create_table_query_reports)
+        self.commit()
+
+    def insert(self, data):
+        try:
+            sql = "INSERT INTO Reports (amount_buy, profit, amount_sell, quantity, paired_symbol) VALUES (%s, %s, %s, %s, %s)".format(*data)
+            self.execute(sql, data)
+            self.commit()
+        except (Exception, Error) as error:
+            print(f"Error insert Reports {error}")
 
 
-    create_table_query_reports = '''CREATE TABLE IF NOT EXISTS Reports
-    (id_report SERIAL PRIMARY KEY,
-    amount_buy NUMERIC (10, 2),
-    profit INTEGER,
-    amount_sell NUMERIC (10, 2),
-    quantity INTEGER,
-    paired_symbol VARCHAR(50));'''
-
-    cursor.execute(create_table_query_reports)
-    cursor.execute(create_table_query_buy)
-    cursor.execute(create_table_query_sell)
-    connection.commit()
-
-
-    print("Table created successfully in PostgreSQL ")
-
-except (Exception, Error) as error:
-    print("Error while connecting to PostgreSQL", error)
-finally:
-    if connection:
-        cursor.close()
-        connection.close()
-        print("PostgreSQL connection is closed")

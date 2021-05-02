@@ -341,3 +341,20 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
 
     print(f"{symbolTicker} purchased value {prev_symbolPrice}")
     return prev_symbolPrice
+
+
+def getId_data_base(list_table: list) -> int:
+    """This function returns 'id' from the table
+
+    Args:
+        list_table (list): list with database query result
+
+    Returns:
+        int: Returns a valid table 'id'
+    """
+    id = None
+    if len(list_table) > 0:
+        for get_id in list_table:
+            id = get_id[0]
+        return id
+    return id

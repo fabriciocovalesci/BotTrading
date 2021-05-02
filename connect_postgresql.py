@@ -205,58 +205,7 @@ class Reports(Connection):
             print(f"Error update Reports in Sell {error}")
     
 
-if __name__ == "__main__":
-    reports = Reports()
-    buy = Buy()
-    sell = Sell()
-    symbol = "XRPUSDT"
-    
-
-    report_init = (1.8998, 5, 0.000, 9, symbol, datetime.now(), False)
-    # reports.insert_report(report_init)
-
-    id_report = reports.select_report_lastest()
-
-    
-#     # print(f'id report {type(id_report)}')
 
 
 
-# # amount, date_buy, amount_sell, quantity ,order_id, current_price, paired_symbol, symbol_base, id_report
-#     now = datetime.now()
-#     print()
-    amount = 1.9234
-    date_buy = datetime.now(timezone.utc)
-    quantity = 90
-    order_id = 23423
-    current_price = 1.9100
-    paired_symbol = 'XRPUSDT'
-    symbol_base = 'XRP'
-
-    buy_order = (amount, date_buy, quantity ,order_id, current_price, paired_symbol, symbol_base, id_report)
-    # buy.insert_buy(buy_order)
-    print(reports.select_report_lastest())
-
-    
-    quantity = 10
-    current_price = 2.1200
-    date_sell = datetime.now(timezone.utc)
-    amount = 10.1020
-
-    list_report = reports.select_report_lastest()
-    id_report = 0
-    for index in list_report:
-        id_report = index[0]
-    
-    id_buy = 0
-    list_buy = buy.select_lastest_buy()
-    for index in list_buy:
-        id_buy = index[0]
-
-    print(f"id report {id_report}")
-    print(f"id buy {id_buy}")
-    sell_order = (date_sell, quantity, current_price, paired_symbol, symbol_base, amount, id_report, id_buy)
-    sell.insert_sell(sell_order)
-    update_query = (2.100, 10)
-    reports.update_report_sell(update_query)
 

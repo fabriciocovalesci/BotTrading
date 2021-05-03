@@ -2,6 +2,7 @@ from binance.client import Client, BinanceAPIException
 from binance.enums import *
 import time
 import numpy as np
+import math
 
 
 def calculate_ma50(symbolTicker, client):
@@ -61,7 +62,7 @@ def tendencia_ma50_4hs_15minCandles(symbolTicker, client):
     return resp
 
 
-def calculate_price_buy(crypto, client):
+def calculate_quantity_buy(crypto, client):
     """
     This function receives a symbol as a parameter, and returns the minimum amount to 10.00 USDT
     
@@ -74,14 +75,14 @@ def calculate_price_buy(crypto, client):
     current_price = client.get_symbol_ticker(symbol=crypto)
     get_price = float(current_price['price'])
     
-    if get_price >= 10.50 and get_price <= 20.0:
+    if get_price >= 15.00 and get_price <= 20.0:
         print(f'Current price bigger then 10, price {get_price} USDT | Buy quantity 1')
         return 1
-    elif get_price <= 10.50:
+    elif get_price <= 15.00:
         quantity = 1
         while True:
             quantity_current = get_price * quantity
-            if quantity_current < 10.50:
+            if quantity_current < 15.00:
                 quantity +=1
                 continue
             break
@@ -280,10 +281,10 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
     try:
         list_of_tickers = client.get_all_tickers()
         prev_symbolPrice = get_price_current(list_of_tickers, symbolTicker)
-        quantityBuy = calculate_price_buy(symbolTicker, client)
+        quantityBuy = calculate_quantity_buy(symbolTicker, client)
         priceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceBUY, 4)
         stopPriceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceStopBUY, 4)
-        quantityBuy = calculate_price_buy(symbolTicker, client)
+        quantityBuy = calculate_quantity_buy(symbolTicker, client)
         quantitySell = quantityBuy
 
         # buy order
@@ -321,10 +322,10 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
                 orderId = buyOrder.get('orderId')
             )
 
-            quantityBuy = calculate_price_buy(symbolTicker, client)
+            quantityBuy = calculate_quantity_buy(symbolTicker, client)
             priceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceBUY, 4)
             stopPriceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceStopBUY, 4)
-            quantityBuy = calculate_price_buy(symbolTicker, client)
+            quantityBuy = calculate_quantity_buy(symbolTicker, client)
             quantitySell = quantityBuy
 
             # buy order
@@ -358,3 +359,45 @@ def getId_data_base(list_table: list) -> int:
             id = get_id[0]
         return id
     return id
+
+
+def get_priceBuy_Quantity(list_table_report: list) -> dict:
+    """This function returns a dict with the purchase price and the quantity purchased
+
+    Args:
+        list_table_report (list): List with the last buy record
+        Ex: [(2, Decimal('1.5821'), 0, Decimal('0.0000'), 10, 'XRPUSDT', datetime.date(2021, 5, 2), False)]
+
+    Returns:
+        dict: Returns a dict with "price_buy" and "quantity"
+    """
+    
+    dict_info = {
+        "price_buy": None,
+        "quantity" : None
+    }
+    if len(list_table_report) != 0:
+        for get_info in list_table_report:
+            dict_info['price_buy'] = get_info[1]
+            dict_info['quantity'] = get_info[4]
+        return dict_info
+    return dict_info
+
+
+def round_down(n, decimals=0):
+    multiplier = 10 ** decimals
+    return int(math.floor(n * multiplier) / multiplier)
+
+def calculate_profit(priceBuy: float, priceSell: float) -> float:
+    return round(float((priceBuy/priceSell)*100),2)
+
+
+def show_await(symbol: str, priceBuy: float, current_price: float, quantity: int) -> str:
+
+    print(f"""
+    ---------- {symbol} ---------------------
+    | price buy:........... {priceBuy}      
+    | current price:....... {current_price} 
+    | quantity for sale:... {quantity}      
+    ---------------------------------------- 
+    """)

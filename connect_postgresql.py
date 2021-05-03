@@ -4,11 +4,11 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 from datetime import *
+from helpers import *
 
 dotenv_path = join(dirname(__file__), '.env')
 
 local_env = load_dotenv(dotenv_path)
-
 
 if local_env:
     POSTGRESQL_USER = os.environ.get("POSTGRESQL_USER")
@@ -165,7 +165,7 @@ class Reports(Connection):
         create_table_query_reports = '''CREATE TABLE IF NOT EXISTS Reports
             (id_report SERIAL PRIMARY KEY,
             amount_buy NUMERIC (10, 4) DEFAULT 0.0000,
-            profit INTEGER DEFAULT 0,
+            profit NUMERIC (10, 2) DEFAULT 0.0,
             amount_sell NUMERIC (10, 4) DEFAULT 0.0000,
             quantity INTEGER DEFAULT 0,
             paired_symbol VARCHAR(50),
@@ -193,7 +193,8 @@ class Reports(Connection):
         try:
             sql = """
             UPDATE reports
-                SET amount_sell = %s,
+                SET profit = %s,
+                    amount_sell = %s,
                     status = true,
                     quantity = %s,
                     date_report = CURRENT_DATE
@@ -203,9 +204,8 @@ class Reports(Connection):
             self.commit()
         except (Exception, Error) as error:
             print(f"Error update Reports in Sell {error}")
-    
 
-
-
-
-
+if __name__ == "__main__":
+    reports = Reports()
+    buy = Buy()
+    sell = Sell()

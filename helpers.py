@@ -1,9 +1,11 @@
 from binance.client import Client, BinanceAPIException
 from binance.enums import *
-import time
 import numpy as np
 import math
+import time as t
+from datetime import datetime, timezone
 
+decimal_places = 4
 
 def calculate_ma50(symbolTicker, client):
     ma50_local = 0
@@ -21,7 +23,7 @@ def calculate_ma50(symbolTicker, client):
     return ma50_local
 
 
-def orderStatus(orderToCkeck, client):
+def orderStatus(orderToCkeck):
     try:
         status = client.get_order(
             symbol = symbolTicker,
@@ -38,7 +40,7 @@ def tendencia_ma50_4hs_15minCandles(symbolTicker, client):
     sum = 0
     ma50_i = 0
 
-    time.sleep(1)
+    t.sleep(1)
 
     resp = False
 
@@ -219,9 +221,9 @@ def show_updated_prices(symbolTicker,ma50, symbolPrice):
     :type symbolPrice: str
     """
     print("********** " + symbolTicker + " **********")
-    print(" ActualMA50: "  + str(round(ma50,4)))
-    print("ActualPrice: " + str(round(symbolPrice,4)))
-    print(" PriceToBuy: "  + str(round(ma50*0.99,4)))
+    print(" ActualMA50: "  + str(round(ma50,decimal_places)))
+    print("ActualPrice: " + str(round(symbolPrice,decimal_places)))
+    print(" PriceToBuy: "  + str(round(ma50*0.99,decimal_places)))
     print("----------------------")
     
 
@@ -242,7 +244,7 @@ def signal_for_sell(percenteSell: float, list_all_tickers: list, symbolTicker: s
         bool: Boolean return signaling sale
     """
     result = list(filter(lambda tick : (tick['symbol'] == symbolTicker), list_all_tickers))
-    price_compare_buy = float(format_Price_decimal_percente(priceCompare, percenteSell, 4))
+    price_compare_buy = float(format_Price_decimal_percente(priceCompare, percenteSell, decimal_places))
     if price_compare_buy < float(result[0]['price']):
         return True
     return False
@@ -260,8 +262,8 @@ def get_price_current(list_all_tickers: list, symbolTicker: str) -> float:
     """
     
     result = list(filter(lambda tick : (tick['symbol'] == symbolTicker), list_all_tickers))
-    return round(float(result[0]['price']), 4)
-    
+    return round(float(result[0]['price']), decimal_places)
+
 
 
 def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePriceBUY: float, percentePriceStopBUY: float ) -> float:
@@ -278,19 +280,30 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
         float: Returns the purchased amount
     """
 
+    return_buy = {
+        "amount_buy": 0.0,
+        "quantity": 0,
+        "order_id": 0
+    }
+    status = 'NEW'
+
     try:
         list_of_tickers = client.get_all_tickers()
         prev_symbolPrice = get_price_current(list_of_tickers, symbolTicker)
         quantityBuy = calculate_quantity_buy(symbolTicker, client)
-        priceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceBUY, 4)
-        stopPriceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceStopBUY, 4)
+        priceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceBUY, decimal_places)
+        stopPriceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceStopBUY, decimal_places)
         quantityBuy = calculate_quantity_buy(symbolTicker, client)
-        quantitySell = quantityBuy
 
+        t.sleep(5)
         # buy order
         buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
+
+        return_buy['amount_buy'] = priceBuy
+        return_buy['quantity'] = quantityBuy
+        return_buy['order_id'] = buyOrder.get('orderId')
+
         status_list = client.get_all_orders(symbol=symbolTicker, orderId=buyOrder['orderId'])
-        status = ''
         for get_status in status_list:
             if get_status['status'] == 'NEW':
                 status = get_status['status']
@@ -301,13 +314,17 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
         print (e.message)
     
 
-    while status == "NEW":
+    while status == 'NEW':
         checke_symbol_price = check_balance(symbolBase, client)
         
         print('status while ' , status)
 
+        if float(checke_symbol_price['price']) > 2.50:
+            print(f"Balance in account {checke_symbol_price['price']}")
+            break
+
         print(f"Balance in account {checke_symbol_price['price']}")
-        time.sleep(5)
+        t.sleep(5)
 
         list_of_tickers = client.get_all_tickers()
         current_symbolPrice = get_price_current(list_of_tickers, symbolTicker)
@@ -317,31 +334,43 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
 
         if ( prev_symbolPrice > current_symbolPrice):
 
-            result = client.cancel_order(
-                symbol = symbolTicker,
-                orderId = buyOrder.get('orderId')
-            )
+            try:
 
-            quantityBuy = calculate_quantity_buy(symbolTicker, client)
-            priceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceBUY, 4)
-            stopPriceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceStopBUY, 4)
-            quantityBuy = calculate_quantity_buy(symbolTicker, client)
-            quantitySell = quantityBuy
+                result = client.cancel_order(
+                    symbol = symbolTicker,
+                    orderId = buyOrder.get('orderId')
+                )
 
-            # buy order
-            buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
-            status_list = client.get_all_orders(symbol=symbolTicker, orderId=buyOrder['orderId'])
-            status = ''
-            for get_status in status_list:
-                if get_status['status'] == 'NEW':
-                    status = get_status['status']
-                    break
-            prev_symbolPrice = current_symbolPrice
-            if status == "NEW":
+                quantityBuy = calculate_quantity_buy(symbolTicker, client)
+                priceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceBUY, decimal_places)
+                stopPriceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceStopBUY, decimal_places)
+                quantityBuy = calculate_quantity_buy(symbolTicker, client)
+                quantitySell = quantityBuy
+
+                # buy order
+                buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
+                return_buy['amount_buy'] = priceBuy
+                return_buy['quantity'] = quantityBuy
+                return_buy['order_id'] = buyOrder.get('orderId')
+
+                status_list = client.get_all_orders(symbol=symbolTicker, orderId=buyOrder['orderId'])
+                for get_status in status_list:
+                    if get_status['status'] == 'NEW':
+                        status = get_status['status']
+                        break
+
+                prev_symbolPrice = current_symbolPrice
+                print('-- ', status)
+                if status == "NEW":
+                    continue
+            except BinanceAPIException as e:
+                print(f'An exception occurred {e}')
+                print(f"status {e.status_code}")
+                print(f'Message {e.message}')
                 continue
 
     print(f"{symbolTicker} purchased value {prev_symbolPrice}")
-    return prev_symbolPrice
+    return return_buy
 
 
 def getId_data_base(list_table: list) -> int:

@@ -6,6 +6,8 @@ import time as t
 from datetime import datetime, timezone
 
 decimal_places = 4
+min_buy = 15.00
+max_buy = 20.00
 
 def calculate_ma50(symbolTicker, client):
     ma50_local = 0
@@ -64,7 +66,7 @@ def tendencia_ma50_4hs_15minCandles(symbolTicker, client):
     return resp
 
 
-def calculate_quantity_buy(crypto, client):
+def calculate_quantity_buy(crypto, client, min_buy, max_buy):
     """
     This function receives a symbol as a parameter, and returns the minimum amount to 10.00 USDT
     
@@ -77,14 +79,14 @@ def calculate_quantity_buy(crypto, client):
     current_price = client.get_symbol_ticker(symbol=crypto)
     get_price = float(current_price['price'])
     
-    if get_price >= 15.00 and get_price <= 20.0:
+    if get_price >= min_buy and get_price <= max_buy:
         print(f'Current price bigger then 10, price {get_price} USDT | Buy quantity 1')
         return 1
-    elif get_price <= 15.00:
+    elif get_price <= min_buy:
         quantity = 1
         while True:
             quantity_current = get_price * quantity
-            if quantity_current < 15.00:
+            if quantity_current < min_buy:
                 quantity +=1
                 continue
             break
@@ -120,10 +122,10 @@ def check_balance(symbol, client):
     returns a bool, True if there is a symbol in the wallet and False if there is no symbol
     """
     balance = client.get_asset_balance(asset=symbol)
-    get_price = float(balance['free'])
-    if get_price == 0.0:
-        return {"status": False, "price": get_price}
-    return {"status": True, "price": get_price}
+    get_quantity = float(balance['free'])
+    if get_quantity == 0.0:
+        return {"status": False, "quantity": get_quantity}
+    return {"status": True, "quantity": get_quantity}
 
 
 
@@ -290,17 +292,17 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
     try:
         list_of_tickers = client.get_all_tickers()
         prev_symbolPrice = get_price_current(list_of_tickers, symbolTicker)
-        quantityBuy = calculate_quantity_buy(symbolTicker, client)
+        quantityBuy = calculate_quantity_buy(symbolTicker, client, min_buy, max_buy)
         priceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceBUY, decimal_places)
         stopPriceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceStopBUY, decimal_places)
-        quantityBuy = calculate_quantity_buy(symbolTicker, client)
+
+        quantityBuy = calculate_quantity_buy(symbolTicker, client, min_buy, max_buy)
 
         t.sleep(5)
         # buy order
         buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
 
         return_buy['amount_buy'] = priceBuy
-        return_buy['quantity'] = quantityBuy
         return_buy['order_id'] = buyOrder.get('orderId')
 
         status_list = client.get_all_orders(symbol=symbolTicker, orderId=buyOrder['orderId'])
@@ -319,11 +321,12 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
         
         print('status while ' , status)
 
-        if float(checke_symbol_price['price']) > 2.50:
-            print(f"Balance in account {checke_symbol_price['price']}")
+        if float(checke_symbol_price['quantity']) > 2.50:
+            print(f"Balance in account {checke_symbol_price['quantity']}")
+            return_buy['quantity'] = checke_symbol_price['quantity']
             break
 
-        print(f"Balance in account {checke_symbol_price['price']}")
+        print(f"Balance in account {checke_symbol_price['quantity']}")
         t.sleep(5)
 
         list_of_tickers = client.get_all_tickers()
@@ -341,16 +344,15 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
                     orderId = buyOrder.get('orderId')
                 )
 
-                quantityBuy = calculate_quantity_buy(symbolTicker, client)
+                quantityBuy = calculate_quantity_buy(symbolTicker, client, min_buy, max_buy)
                 priceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceBUY, decimal_places)
                 stopPriceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceStopBUY, decimal_places)
-                quantityBuy = calculate_quantity_buy(symbolTicker, client)
+                quantityBuy = calculate_quantity_buy(symbolTicker, client, min_buy, max_buy)
                 quantitySell = quantityBuy
 
                 # buy order
                 buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
                 return_buy['amount_buy'] = priceBuy
-                return_buy['quantity'] = quantityBuy
                 return_buy['order_id'] = buyOrder.get('orderId')
 
                 status_list = client.get_all_orders(symbol=symbolTicker, orderId=buyOrder['orderId'])
@@ -421,12 +423,74 @@ def calculate_profit(priceBuy: float, priceSell: float) -> float:
     return round(float((priceBuy/priceSell)*100),2)
 
 
-def show_await(symbol: str, priceBuy: float, current_price: float, quantity: int) -> str:
+def show_await(symbol: str, priceBuy: float, current_price: float, quantity: int, percenteSell: float) -> str:
 
     print(f"""
     ---------- {symbol} ---------------------
-    | price buy:........... {priceBuy}      
+    | price buy:........... {priceBuy}
+    | price sell:...........{float(format_Price_decimal_percente(priceBuy, percenteSell, decimal_places))}      
     | current price:....... {current_price} 
     | quantity for sale:... {quantity}      
     ---------------------------------------- 
     """)
+
+
+def STARTING_SALE(symbolTicker: str, symbolBase: str, client: object, percentagePriceSELL: float, percentageStopPriceSELL: float, percentagestopLimitPriceSELL: float, dict_info: dict) -> dict:
+    """[summary]
+
+    Args:
+        symbolTicker (str): [description]
+        symbolBase (str): [description]
+        client (object): [description]
+        percentagePriceSELL (float): [description]
+        percentageStopPriceSELL (float): [description]
+        percentagestopLimitPriceSELL (float): [description]
+        dict_info (dict): [description]
+
+    Returns:
+        dict: [description]
+    """
+
+    try:
+
+        return_sell = {
+            "priceSell": None,
+            "quantity": None
+        }
+        list_of_tickers = client.get_all_tickers()
+        symbolPriceSale = get_price_current(list_of_tickers, symbolTicker)
+
+        priceSell = format_Price_decimal_percente(str(symbolPriceSale), percentagePriceSELL, decimal_places)
+        stopPriceSell = format_Price_decimal_percente(str(symbolPriceSale), percentageStopPriceSELL, decimal_places)
+        stopLimitPriceSell = format_Price_decimal_percente(str(symbolPriceSale), percentagestopLimitPriceSELL, decimal_places)
+
+        if dict_info['price_buy'] == None and dict_info['quantity'] == None:
+            print(f'Error in {dict_info}')
+
+        quantitySell = round_down(dict_info['quantity'])
+
+        orderOCO = sell_order_OCO(client, symbolTicker, quantitySell, priceSell, stopPriceSell, stopLimitPriceSell)
+
+        while True:
+
+            t.sleep(2)
+            orders = client.get_open_orders(symbol=symbolTicker)
+            if(len(orders) != 0):
+                for key, value in orders[0].items():
+                    if key == 'price':
+                        return_sell['priceSell'] = value
+                    if key == 'origQty':
+                        return_sell["quantity"] = value
+                print('Open Orders on Sale')
+                t.sleep(5)
+                continue
+            else:
+                return return_sell
+                break
+
+    except BinanceAPIException as e:
+        print(e)
+        with open("Error_Bot.txt", "a") as myfile:
+            SendEmailERROR(e, str(datetime.now().strftime("%d-%m-%y %H:%M:%S")))
+            myfile.write(str(datetime.now().strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
+        

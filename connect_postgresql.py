@@ -78,7 +78,7 @@ class Buy(Connection):
             (id_buy SERIAL PRIMARY KEY,
             amount NUMERIC (10, 4),
             date_buy TIMESTAMP,
-            quantity INTEGER DEFAULT 0,
+            quantity NUMERIC (10, 5),
             order_id VARCHAR(50),
             current_price NUMERIC (10, 4),
             paired_symbol VARCHAR(50),
@@ -121,7 +121,7 @@ class Sell(Connection):
         create_table_query_sell = '''CREATE TABLE IF NOT EXISTS Sell
             (id_sell SERIAL PRIMARY KEY,
             date_sell TIMESTAMP,
-            quantity INTEGER DEFAULT 0,
+            quantity NUMERIC (10, 5),
             current_price NUMERIC (10, 4),
             paired_symbol VARCHAR(50),
             symbol_base VARCHAR(50),
@@ -167,7 +167,7 @@ class Reports(Connection):
             amount_buy NUMERIC (10, 4) DEFAULT 0.0000,
             profit NUMERIC (10, 2) DEFAULT 0.0,
             amount_sell NUMERIC (10, 4) DEFAULT 0.0000,
-            quantity INTEGER DEFAULT 0,
+            quantity NUMERIC (10, 5),
             paired_symbol VARCHAR(50),
             date_report DATE DEFAULT CURRENT_DATE,
             status BOOLEAN DEFAULT False);'''
@@ -205,7 +205,3 @@ class Reports(Connection):
         except (Exception, Error) as error:
             print(f"Error update Reports in Sell {error}")
 
-if __name__ == "__main__":
-    reports = Reports()
-    buy = Buy()
-    sell = Sell()

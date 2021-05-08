@@ -494,3 +494,65 @@ def STARTING_SALE(symbolTicker: str, symbolBase: str, client: object, percentage
             SendEmailERROR(e, str(datetime.now().strftime("%d-%m-%y %H:%M:%S")))
             myfile.write(str(datetime.now().strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
         
+
+
+def body_email_buy(symbolTicker: str, price_current: float, price_buy: float,percentagePriceSELL: float, quantity_buy: float) -> str:
+    price = round(float(price_buy*quantity_buy), 3)
+    price_sell = float(price_buy*percentagePriceSELL)
+    html = f"""\
+            <html>
+            <head></head>
+            <body>
+                <h2><strong>Compra efetuada com sucesso &#129302; !!</strong></h2><br>
+                <h3>Date: {str(datetime.now().strftime("%d-%m-%y %H:%M:%S"))} &#8986;</h3>
+                <table style="width:70%">
+                    <tr>
+                        <th>Asset</th>
+                        <th>Price Current</th>
+                        <th>Price for Sale</th>
+                        <th>Price Buy</th>
+                        <th>Quantity</th>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">{symbolTicker}</td>
+                        <td style="text-align: center;">{price_current} USDT</td>
+                        <td style="text-align: center;">{price_sell} USDT</td>
+                        <td style="text-align: center;">{price} USDT</td>
+                        <td style="text-align: center;">{quantity_buy}</td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+            """
+    return html
+
+def body_email_sell(symbolTicker: str, price_current: float, price_buy: float,price_sell: float, profit: float, quantity_sell: int) -> str:
+    price_sale = round(float(price_sell*quantity_sell), 3)
+    html = f"""\
+            <html>
+            <head></head>
+            <body>
+                <h2><strong>Venda efetuada com sucesso &#129302; !!</strong></h2><br>
+                <h3>Date: {str(datetime.now().strftime("%d-%m-%y %H:%M:%S"))} &#8986;</h3>
+                <table style="width:70%">
+                    <tr>
+                        <th>Asset</th>
+                        <th>Price Current</th>
+                        <th>Price Sale</th>
+                        <th>Price Buy</th>
+                        <th>Quantity</th>
+                        <th>Profit</th>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">{symbolTicker}</td>
+                        <td style="text-align: center;">{price_current} USDT</td>
+                        <td style="text-align: center;">{price_sale} USDT</td>
+                        <td style="text-align: center;">{price_buy} USDT</td>
+                        <td style="text-align: center;">{quantity_sell}</td>
+                        <td style="text-align: center;">{profit} USDT</td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+            """
+    return html

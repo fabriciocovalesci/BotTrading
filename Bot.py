@@ -8,7 +8,7 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 from helpers import *
-from connect_postgresql import Buy, Sell, Reports
+from Connect_PostgreSQL import Buy, Sell, Reports
 from Email import Gmail
 
 dotenv_path = join(dirname(__file__), '.env')
@@ -83,18 +83,25 @@ while True:
     if len(Reports_DataBase.select_report_lastest()) != 0 and checke_symbol_price['status'] == True and round(float(price_current_XRPUSDT), decimal_places) >= 10.50:
 
         t.sleep(15)
-        
-        symbolPriceSale = get_price_current(list_of_tickers, symbolTicker)
 
-        dict_info = get_priceBuy_Quantity(Reports_DataBase.select_report_lastest())
+        try:
+            symbolPriceSale = get_price_current(list_of_tickers, symbolTicker)
 
-        if dict_info['price_buy'] == None and dict_info['quantity'] == None:
-            print('Error in {dict_info}')
+            dict_info = get_priceBuy_Quantity(Reports_DataBase.select_report_lastest())
 
-        quantitySell = round_down(dict_info['quantity'])
-        priceBuyCompare = float(dict_info['price_buy'])
+            if dict_info['price_buy'] == None and dict_info['quantity'] == None:
+                print('Error in {dict_info}')
 
-        show_await(symbolTicker, priceBuyCompare, symbolPriceSale, quantitySell, percentagePriceSELL)
+            quantitySell = round_down(dict_info['quantity'])
+            priceBuyCompare = float(dict_info['price_buy'])
+
+            show_await(symbolTicker, priceBuyCompare, symbolPriceSale, quantitySell, percentagePriceSELL)
+
+        except BinanceAPIException as e:
+            with open("Error_Bot.txt", "a") as myfile:
+                myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Error in await price ! \n")
+            client = Client(API_KEY, API_SECRET, tld='com')
+            continue
 
         if signal_for_sell(percentagePriceSELL, list_of_tickers, symbolTicker, priceBuyCompare):
             print('\t\t____Starting Sale____')

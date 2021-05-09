@@ -44,3 +44,9 @@ POSTGRESQL_PORT = '5432'
 >> python3 Bot.py
 
 ```
+
+
+### Project Architecture
+
+
+![BotTrading](https://user-images.githubusercontent.com/40548641/117583017-4791dc80-b0db-11eb-9742-08843ae936c0.png)

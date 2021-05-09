@@ -22,7 +22,7 @@
 |  Install project dependencies        |  `pip install -r requirements.txt`                                     |  
 
 
-### create `.env` at the root of the project
+### Create `.env` at the root of the project
 
 ```
 API_KEY = 'YOUR_API_KEY_BINANCE'

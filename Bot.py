@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from sendEmail import *
 from helpers import *
 from connect_postgresql import Buy, Sell, Reports
+from Email import Gmail
 
 dotenv_path = join(dirname(__file__), '.env')
 
@@ -52,6 +53,8 @@ Buy_DataBase =  Buy()
 Sell_DataBase = Sell()
 Reports_DataBase = Reports()
 
+# object instance for send Email
+Send_Email = Gmail(GMAIL_EMAIL, GMAIL_PASSWORD)
 
 # decimal places
 decimal_places = 4
@@ -128,6 +131,9 @@ while True:
                 order_sell_tuple = (date_sell, quantitySell, current_price_sell, symbolTicker, symbolBase, priceSell, id_report, id_buy)
                 Sell_DataBase.insert_sell(order_sell_tuple)
                 SendEmailSell(return_sell, str(now.strftime("%d-%m-%y %H:%M:%S")))
+                
+                body_email_for_sell = body_email_sell(symbolTicker, current_price_sell, price_buy, priceSell, profit, quantitySell)
+                Send_Email.send_email("Success Sell", body_email_for_sell)
 
                 t.sleep(15)
             except BinanceAPIException as e:
@@ -184,6 +190,9 @@ while True:
                 client = Client(API_KEY, API_SECRET, tld='com')
                 return_buy = Dinamic_Buy(symbolTicker, symbolBase, client, percentePriceBUY, percentePriceStopBUY)
 
+                list_of_tickers = client.get_all_tickers()
+                current_price_buy = get_price_current(list_of_tickers, symbolTicker)
+
                 symbolPrice = float(return_buy['amount_buy'])
                 quantity_buy_insert = float(return_buy['quantity'])
                 
@@ -194,9 +203,12 @@ while True:
 
                 date_buy = datetime.now(timezone.utc)
                 order_id = return_buy['order_id']
+
                 buy_tuple_db = (symbolPrice, date_buy, quantity_buy_insert ,order_id, symbolPrice, symbolTicker, symbolBase, id_report)
                 Buy_DataBase.insert_buy(buy_tuple_db)
-                SendEmailBuy(symbolPrice, str(now.strftime("%d-%m-%y %H:%M:%S")))
+
+                body_email_for_sell = body_email_buy(symbolPrice, current_price_buy, symbolPrice, percentagePriceSELL, quantity_buy_insert)
+                Send_Email.send_email("Success Sell", body_email_for_sell)
 
                 t.sleep(20)
 
@@ -241,6 +253,9 @@ while True:
                             order_sell_tuple = (date_sell, quantitySell, current_price_sell, symbolTicker, symbolBase, priceSell, id_report, id_buy)
                             Sell_DataBase.insert_sell(order_sell_tuple)
                             SendEmailSell(return_sell, str(now.strftime("%d-%m-%y %H:%M:%S")))
+
+                            body_email_for_sell = body_email_sell(symbolTicker, current_price_sell, price_buy, priceSell, profit, quantitySell)
+                            Send_Email.send_email("Success Sell", body_email_for_sell)
 
                             t.sleep(15)
                         except BinanceAPIException as e:

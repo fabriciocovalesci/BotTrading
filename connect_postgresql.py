@@ -16,6 +16,13 @@ if local_env:
     POSTGRESQL_DATABASE = os.environ.get("POSTGRESQL_DATABASE")
     POSTGRESQL_HOST = os.environ.get("POSTGRESQL_HOST")
     POSTGRESQL_PORT = os.environ.get("POSTGRESQL_PORT")
+else:
+    POSTGRESQL_USER = os.environ.get("POSTGRESQL_USER")
+    POSTGRESQL_PASSWORD = os.environ.get("POSTGRESQL_PASSWORD")
+    POSTGRESQL_DATABASE = os.environ.get("POSTGRESQL_DATABASE")
+    POSTGRESQL_HOST = os.environ.get("POSTGRESQL_HOST")
+    POSTGRESQL_PORT = os.environ.get("POSTGRESQL_PORT")
+
 
 
 class Config:

@@ -15,11 +15,11 @@ local_env = load_dotenv(dotenv_path)
 if local_env:
     GMAIL_EMAIL = os.environ.get("GMAIL_EMAIL")
     GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
+    GMAIL_RECEIVER_ADDRES = os.environ.get("GMAIL_RECEIVER_ADDRES")
 else:
     GMAIL_EMAIL = os.environ.get("GMAIL_EMAIL")
     GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
-
-receiver_address = 'fabcovalesci@gmail.com'
+    GMAIL_RECEIVER_ADDRES = os.environ.get("GMAIL_RECEIVER_ADDRES")
 
 
 class Gmail(object):
@@ -35,16 +35,16 @@ class Gmail(object):
         session.login(self.email, self.password)
         self.session = session
 
-    def send_message(self, subject, body):
+    def send_email(self, subject, body):
         msg = MIMEMultipart('alternative')
         msg['Subject'] = subject
         msg['From'] = self.email
-        msg['To'] = receiver_address
+        msg['To'] = GMAIL_RECEIVER_ADDRES
         msg['MIME-Version'] = '1.0'
         msg['Content-Type'] = 'text/html'
         body_send = MIMEText(body, 'html')
         msg.attach(body_send)
         self.session.sendmail(
             self.email,
-            receiver_address,
+            GMAIL_RECEIVER_ADDRES,
             msg.as_string())

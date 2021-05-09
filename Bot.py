@@ -128,7 +128,6 @@ while True:
                 date_sell = datetime.now(timezone.utc)
                 order_sell_tuple = (date_sell, quantitySell, current_price_sell, symbolTicker, symbolBase, priceSell, id_report, id_buy)
                 Sell_DataBase.insert_sell(order_sell_tuple)
-                SendEmailSell(return_sell, str(now.strftime("%d-%m-%y %H:%M:%S")))
                 
                 body_email_for_sell = body_email_sell(symbolTicker, current_price_sell, price_buy, priceSell, profit, quantitySell)
                 Send_Email.send_email("Success Sell", body_email_for_sell)
@@ -248,7 +247,6 @@ while True:
                             date_sell = datetime.now(timezone.utc)
                             order_sell_tuple = (date_sell, quantitySell, current_price_sell, symbolTicker, symbolBase, priceSell, id_report, id_buy)
                             Sell_DataBase.insert_sell(order_sell_tuple)
-                            SendEmailSell(return_sell, str(now.strftime("%d-%m-%y %H:%M:%S")))
 
                             body_email_for_sell = body_email_sell(symbolTicker, current_price_sell, price_buy, priceSell, profit, quantitySell)
                             Send_Email.send_email("Success Sell", body_email_for_sell)

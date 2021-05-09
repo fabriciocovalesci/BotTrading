@@ -7,7 +7,6 @@ import math
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
-from sendEmail import *
 from helpers import *
 from connect_postgresql import Buy, Sell, Reports
 from Email import Gmail
@@ -72,7 +71,6 @@ while True:
             
     except BinanceAPIException as e:
         with open("Error_Bot.txt", "a") as myfile:
-            SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
             myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 1 ! \n")
         client = Client(API_KEY, API_SECRET, tld='com')
         print(f"status {e.status_code}")
@@ -138,7 +136,6 @@ while True:
                 t.sleep(15)
             except BinanceAPIException as e:
                 with open("Error_Bot.txt", "a") as myfile:
-                    SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                     myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
                 client = Client(API_KEY, API_SECRET, tld='com')
                 continue
@@ -165,7 +162,6 @@ while True:
             orders = client.get_open_orders(symbol=symbolTicker)
         except BinanceAPIException as e:
             with open("Error_Bot.txt", "a") as myfile:
-                SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                 myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 1 ! \n")
             client = Client(API_KEY, API_SECRET, tld='com')
             print(f"status {e.status_code}")
@@ -260,7 +256,6 @@ while True:
                             t.sleep(15)
                         except BinanceAPIException as e:
                             with open("Error_Bot.txt", "a") as myfile:
-                                SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                                 myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
                             client = Client(API_KEY, API_SECRET, tld='com')
                             continue
@@ -269,7 +264,6 @@ while True:
 
             except BinanceAPIException as e:
                 with open("Error_Bot.txt", "a") as myfile:
-                    SendEmailERROR(e, str(now.strftime("%d-%m-%y %H:%M:%S")))
                     myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
                 client = Client(API_KEY, API_SECRET, tld='com')
                 print(e)

@@ -29,8 +29,8 @@ else:
 
 
 client = Client(API_KEY, API_SECRET, tld='com')
-symbolTicker =  'XRPUSDT'
-symbolBase = 'XRP' # 
+symbolTicker =  'DOGEUSDT'
+symbolBase = 'DOGE' 
 ma50 = 0
 auxPrice = 0.0
 
@@ -158,7 +158,6 @@ while True:
         print(f"Current value of {symbolTicker} - {symbolPrice}")
             
         ma50 = calculate_ma50(symbolTicker, client)
-        print('ma50 ', round(ma50, decimal_places))
         print('Tendencia ', tendencia_ma50_4hs_15minCandles(symbolTicker, client))
         if (ma50 == 0): continue
         

@@ -48,3 +48,4 @@ class Gmail(object):
             self.email,
             GMAIL_RECEIVER_ADDRESS,
             msg.as_string())
+

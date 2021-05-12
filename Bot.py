@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from helpers import *
 from Connect_PostgreSQL import Buy, Sell, Reports
 from Email import Gmail
+import smtplib
+
 
 dotenv_path = join(dirname(__file__), '.env')
 
@@ -29,8 +31,8 @@ else:
 
 
 client = Client(API_KEY, API_SECRET, tld='com')
-symbolTicker =  'DOGEUSDT'
-symbolBase = 'DOGE' 
+symbolTicker =  'XRPUSDT'
+symbolBase = 'XRP' 
 ma50 = 0
 auxPrice = 0.0
 
@@ -208,8 +210,8 @@ while True:
                 buy_tuple_db = (symbolPrice, date_buy, quantity_buy_insert ,order_id, symbolPrice, symbolTicker, symbolBase, id_report)
                 Buy_DataBase.insert_buy(buy_tuple_db)
 
-                body_email_for_sell = body_email_buy(symbolPrice, current_price_buy, symbolPrice, percentagePriceSELL, quantity_buy_insert)
-                Send_Email.send_email("Success Sell", body_email_for_sell)
+                body_email_for_buy = body_email_buy(symbolPrice, current_price_buy, symbolPrice, percentagePriceSELL, quantity_buy_insert)
+                Send_Email.send_email("Success Sell", body_email_for_buy)
 
                 t.sleep(20)
 

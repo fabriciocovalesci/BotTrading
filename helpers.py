@@ -303,7 +303,7 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
         buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
 
         return_buy['amount_buy'] = priceBuy
-        return_buy['order_id'] = buyOrder.get('orderId')
+        return_buy['order_id'] = buyOrder['orderId']
 
         status_list = client.get_all_orders(symbol=symbolTicker, orderId=buyOrder['orderId'])
         for get_status in status_list:
@@ -341,19 +341,18 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
 
                 result = client.cancel_order(
                     symbol = symbolTicker,
-                    orderId = buyOrder.get('orderId')
+                    orderId = buyOrder['orderId']
                 )
 
                 quantityBuy = calculate_quantity_buy(symbolTicker, client, min_buy, max_buy)
                 priceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceBUY, decimal_places)
                 stopPriceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceStopBUY, decimal_places)
                 quantityBuy = calculate_quantity_buy(symbolTicker, client, min_buy, max_buy)
-                quantitySell = quantityBuy
 
                 # buy order
                 buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
                 return_buy['amount_buy'] = priceBuy
-                return_buy['order_id'] = buyOrder.get('orderId')
+                return_buy['order_id'] = buyOrder['orderId']
 
                 status_list = client.get_all_orders(symbol=symbolTicker, orderId=buyOrder['orderId'])
                 for get_status in status_list:

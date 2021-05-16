@@ -21,15 +21,19 @@ if local_env:
     API_SECRET = os.environ.get("API_SECRET")
     GMAIL_EMAIL = os.environ.get("GMAIL_EMAIL")
     GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
+    SYMBOL_TICKER = os.environ.get("SYMBOL_TICKER")
+    SYMBOL_BASE = os.environ.get("SYMBOL_BASE")
 else:
     API_KEY = os.environ.get("API_KEY")
     API_SECRET = os.environ.get("API_SECRET")
     GMAIL_EMAIL = os.environ.get("GMAIL_EMAIL")
     GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
+    SYMBOL_TICKER = os.environ.get("SYMBOL_TICKER")
+    SYMBOL_BASE = os.environ.get("SYMBOL_BASE")
 
 client = Client(API_KEY, API_SECRET, tld='com')
-symbolTicker =  'DOGEUSDT'
-symbolBase = 'DOGE'
+symbolTicker =  SYMBOL_TICKER
+symbolBase = SYMBOL_BASE
 
 ma50 = 0
 auxPrice = 0.0
@@ -207,7 +211,7 @@ while True:
                 buy_tuple_db = (symbolPrice, date_buy, quantity_buy_insert ,order_id, symbolPrice, symbolTicker, symbolBase, id_report)
                 Buy_DataBase.insert_buy(buy_tuple_db)
 
-                body_email_for_buy = body_email_buy(symbolPrice, current_price_buy, symbolPrice, percentagePriceSELL, quantity_buy_insert)
+                body_email_for_buy = body_email_buy(symbolTicker, current_price_buy, symbolPrice, percentagePriceSELL, quantity_buy_insert)
                 Send_Email.send_email("Success Buy", body_email_for_buy)
 
                 t.sleep(20)

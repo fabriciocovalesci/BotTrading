@@ -25,7 +25,7 @@ def calculate_ma50(symbolTicker, client):
     return ma50_local
 
 
-def orderStatus(orderToCkeck):
+def orderStatus(orderToCkeck, symbolTicker):
     try:
         status = client.get_order(
             symbol = symbolTicker,
@@ -490,7 +490,6 @@ def STARTING_SALE(symbolTicker: str, symbolBase: str, client: object, percentage
     except BinanceAPIException as e:
         print(e)
         with open("Error_Bot.txt", "a") as myfile:
-            SendEmailERROR(e, str(datetime.now().strftime("%d-%m-%y %H:%M:%S")))
             myfile.write(str(datetime.now().strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
         
 
@@ -555,3 +554,22 @@ def body_email_sell(symbolTicker: str, price_current: float, price_buy: float,pr
             </html>
             """
     return html
+
+
+def SELL_MARKET(symbolTicker: str, quantity: int, client: object) -> dict:
+    """ This function executes a market sales order
+
+    Args:
+        symbolTicker (str): Pair symbol crypto
+        quantity (int): Quantity for sale
+        client (object): Binance API Client Instance
+
+    Returns:
+        dict: Returns a dict with sale information
+    """
+    
+    try:
+        order = client.order_market_sell(symbol=symbolTicker,quantity=quantity)
+        return order
+    except BinanceAPIException as error:
+        print(f"Error on sell market {error}")

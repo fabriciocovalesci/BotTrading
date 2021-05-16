@@ -10,8 +10,6 @@ from dotenv import load_dotenv
 from helpers import *
 from Connect_PostgreSQL import Buy, Sell, Reports
 from Email import Gmail
-import smtplib
-
 
 dotenv_path = join(dirname(__file__), '.env')
 
@@ -29,25 +27,21 @@ else:
     GMAIL_EMAIL = os.environ.get("GMAIL_EMAIL")
     GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
 
-
 client = Client(API_KEY, API_SECRET, tld='com')
-symbolTicker =  'XRPUSDT'
-symbolBase = 'XRP' 
+symbolTicker =  'DOGEUSDT'
+symbolBase = 'DOGE'
+
 ma50 = 0
 auxPrice = 0.0
-
-
 
 # Percente For Buy
 percentePriceBUY = 1.001
 percentePriceStopBUY = 1.002
 
-
 # Percente For Sell
 percentagePriceSELL = 1.05 #1.02
 percentageStopPriceSELL = 0.999 #0.992
 percentagestopLimitPriceSELL = 1.02 #0.99
-
 
 # object instance for DML PostgreSQL Database
 Buy_DataBase =  Buy()
@@ -59,7 +53,6 @@ Send_Email = Gmail(GMAIL_EMAIL, GMAIL_PASSWORD)
 
 # decimal places
 decimal_places = 4
-
 
 now = datetime.now()
 
@@ -107,16 +100,20 @@ while True:
 
         if signal_for_sell(percentagePriceSELL, list_of_tickers, symbolTicker, priceBuyCompare):
             print('\t\t____Starting Sale____')
-            t.sleep(20)
             
             try:
+                client = Client(API_KEY, API_SECRET, tld='com')
                 dict_info = get_priceBuy_Quantity(Reports_DataBase.select_report_lastest())
-                return_sell = STARTING_SALE(symbolTicker, symbolBase, client, percentagePriceSELL, percentageStopPriceSELL, percentagestopLimitPriceSELL, dict_info)
-                
+               
+                return_sell = SELL_MARKET(symbolTicker, round_down(dict_info['quantity']), client)
+
                 price_buy = float(dict_info['price_buy'])
-                quantitySell = float(return_sell['quantity'])
+                quantitySell = float(return_sell['executedQty'])
                 quantityBuy_profit = float(dict_info['quantity'])
-                priceSell = float(return_sell['priceSell'])
+
+                # get_order_sell_status = client.get_order(symbol=symbolTicker,orderId=return_sell['orderId'])
+
+                priceSell = float(return_sell['fills'][0]['price'])
 
                 profit = round(float(abs((priceSell*quantitySell) - (price_buy*quantityBuy_profit))), decimal_places)
 
@@ -211,62 +208,9 @@ while True:
                 Buy_DataBase.insert_buy(buy_tuple_db)
 
                 body_email_for_buy = body_email_buy(symbolPrice, current_price_buy, symbolPrice, percentagePriceSELL, quantity_buy_insert)
-                Send_Email.send_email("Success Sell", body_email_for_buy)
+                Send_Email.send_email("Success Buy", body_email_for_buy)
 
                 t.sleep(20)
-
-                if len(Reports_DataBase.select_report_lastest()) != 0:
-
-                    reports_lastest = Reports_DataBase.select_report_lastest()
-                    priceCompare = 0.0
-                    for item in reports_lastest:
-                        priceCompare = float(item[1])
-
-                    list_of_tickers = client.get_all_tickers()
-
-                    if signal_for_sell(percentagePriceSELL, list_of_tickers, symbolTicker, priceCompare):
-                        print('____ Signal for Sale ____')
-                        t.sleep(10)
-            
-                        try:
-                            dict_info = get_priceBuy_Quantity(Reports_DataBase.select_report_lastest())
-                            return_sell = STARTING_SALE(symbolTicker, symbolBase, client, percentagePriceSELL, percentageStopPriceSELL, percentagestopLimitPriceSELL, dict_info)
-
-                            price_buy = float(dict_info['price_buy'])
-                            quantitySell = int(return_sell['quantity'])
-                            priceSell = float(return_sell['priceSell'])
-
-                            profit = round(float(abs((priceSell*quantitySell) - (price_buy*dict_info['quantity']))), decimal_places)
-
-                            id_report = getId_data_base(Reports_DataBase.select_report_lastest())
-
-                            id_buy = 0
-                            list_buy = Buy_DataBase.select_lastest_buy()
-                            for index in list_buy:
-                                id_buy = index[0]
-
-                            quantity_sell_update_reports = float(quantitySell)
-                            update_query = (profit, priceSell, quantity_sell_update_reports)
-                            Reports_DataBase.update_report_sell(update_query)
-
-                            t.sleep(5)
-                            list_of_tickers = client.get_all_tickers()
-                            current_price_sell = get_price_current(list_of_tickers, symbolTicker)
-                            date_sell = datetime.now(timezone.utc)
-                            order_sell_tuple = (date_sell, quantitySell, current_price_sell, symbolTicker, symbolBase, priceSell, id_report, id_buy)
-                            Sell_DataBase.insert_sell(order_sell_tuple)
-
-                            body_email_for_sell = body_email_sell(symbolTicker, current_price_sell, price_buy, priceSell, profit, quantitySell)
-                            Send_Email.send_email("Success Sell", body_email_for_sell)
-
-                            t.sleep(15)
-                        except BinanceAPIException as e:
-                            with open("Error_Bot.txt", "a") as myfile:
-                                myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
-                            client = Client(API_KEY, API_SECRET, tld='com')
-                            continue
-
-                t.sleep(10)
 
             except BinanceAPIException as e:
                 with open("Error_Bot.txt", "a") as myfile:

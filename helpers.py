@@ -298,7 +298,7 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
 
         quantityBuy = calculate_quantity_buy(symbolTicker, client, min_buy, max_buy)
 
-        t.sleep(5)
+        t.sleep(3)
         # buy order
         buyOrder = buy_stop_loss_limit(client, symbolTicker, quantityBuy, priceBuy ,stopPriceBuy)
 
@@ -327,7 +327,7 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
             break
 
         print(f"Balance in account {checke_symbol_price['quantity']}")
-        t.sleep(5)
+        t.sleep(3)
 
         list_of_tickers = client.get_all_tickers()
         current_symbolPrice = get_price_current(list_of_tickers, symbolTicker)

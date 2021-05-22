@@ -21,19 +21,19 @@ if local_env:
     API_SECRET = os.environ.get("API_SECRET")
     GMAIL_EMAIL = os.environ.get("GMAIL_EMAIL")
     GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
-    SYMBOL_TICKER = os.environ.get("SYMBOL_TICKER")
-    SYMBOL_BASE = os.environ.get("SYMBOL_BASE")
+    # SYMBOL_TICKER = os.environ.get("SYMBOL_TICKER")
+    # SYMBOL_BASE = os.environ.get("SYMBOL_BASE")
 else:
     API_KEY = os.environ.get("API_KEY")
     API_SECRET = os.environ.get("API_SECRET")
     GMAIL_EMAIL = os.environ.get("GMAIL_EMAIL")
     GMAIL_PASSWORD = os.environ.get("GMAIL_PASSWORD")
-    SYMBOL_TICKER = os.environ.get("SYMBOL_TICKER")
-    SYMBOL_BASE = os.environ.get("SYMBOL_BASE")
+    # SYMBOL_TICKER = os.environ.get("SYMBOL_TICKER")
+    # SYMBOL_BASE = os.environ.get("SYMBOL_BASE")
 
 client = Client(API_KEY, API_SECRET, tld='com')
-symbolTicker =  SYMBOL_TICKER
-symbolBase = SYMBOL_BASE
+symbolTicker = 'XRPUSDT'
+symbolBase = 'XRP'
 
 ma50 = 0
 auxPrice = 0.0

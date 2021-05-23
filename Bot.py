@@ -32,8 +32,8 @@ else:
     # SYMBOL_BASE = os.environ.get("SYMBOL_BASE")
 
 client = Client(API_KEY, API_SECRET, tld='com')
-symbolTicker = 'XRPUSDT'
-symbolBase = 'XRP'
+symbolTicker = 'ALGOUSDT'
+symbolBase = 'ALGO'
 
 ma50 = 0
 auxPrice = 0.0
@@ -138,8 +138,13 @@ while True:
                 date_sell = datetime.now(timezone.utc)
                 order_sell_tuple = (date_sell, quantitySell, current_price_sell, symbolTicker, symbolBase, priceSell, id_report, id_buy)
                 Sell_DataBase.insert_sell(order_sell_tuple)
+
+                t.sleep(5)
                 
                 body_email_for_sell = body_email_sell(symbolTicker, current_price_sell, price_buy, priceSell, profit, quantitySell)
+                
+                t.sleep(3)
+
                 Send_Email.send_email("Success Sell", body_email_for_sell)
 
                 t.sleep(15)
@@ -211,7 +216,12 @@ while True:
                 buy_tuple_db = (symbolPrice, date_buy, quantity_buy_insert ,order_id, symbolPrice, symbolTicker, symbolBase, id_report)
                 Buy_DataBase.insert_buy(buy_tuple_db)
 
+                t.sleep(5)
+
                 body_email_for_buy = body_email_buy(symbolTicker, current_price_buy, symbolPrice, percentagePriceSELL, quantity_buy_insert)
+                
+                t.sleep(3)
+
                 Send_Email.send_email("Success Buy", body_email_for_buy)
 
                 t.sleep(20)

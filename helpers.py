@@ -6,8 +6,8 @@ import time as t
 from datetime import datetime, timezone
 
 decimal_places = 4
-min_buy = 15.00
-max_buy = 20.00
+min_buy = 55.00
+max_buy = 60.00
 
 def calculate_ma50(symbolTicker, client):
     ma50_local = 0

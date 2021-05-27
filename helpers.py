@@ -524,7 +524,7 @@ def body_email_buy(symbolTicker: str, price_current: float, price_buy: float,per
             """
     return html
 
-def body_email_sell(symbolTicker: str, price_current: float, price_buy: float,price_sell: float, profit: float, quantity_sell: int) -> str:
+def body_email_sell(symbolTicker: str, price_current: float, price_buy: float,price_sell: float, profit: float, quantity_sell: float) -> str:
     price_sale = round(float(price_sell*quantity_sell), 3)
     html = f"""\
             <html>

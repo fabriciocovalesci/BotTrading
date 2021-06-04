@@ -37,13 +37,13 @@ ma50 = 0
 auxPrice = 0.0
 
 # Percente For Buy
-percentePriceBUY = 1.001
-percentePriceStopBUY = 1.002
+percentePriceBUY = 1.0055
+percentePriceStopBUY = 1.005
 
 # Percente For Sell
-percentagePriceSELL = 1.05 #1.02
-percentageStopPriceSELL = 0.999 #0.992
-percentagestopLimitPriceSELL = 1.02 #0.99 
+percentagePriceSELL = 1.03
+# percentageStopPriceSELL = 0.999 #0.992
+# percentagestopLimitPriceSELL = 1.02 #0.99 
 
 # object instance for DML PostgreSQL Database
 Buy_DataBase =  Buy()

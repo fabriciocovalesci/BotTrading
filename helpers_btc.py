@@ -510,20 +510,24 @@ def Dinamic_Buy_Bitcoin(symbolTicker: str, symbolBase: str, client: object, perc
     
 
     while status == 'NEW':
+
         checke_symbol_price = check_balance(symbolBase, client)
         
         print('status while ' , status)
 
-        if float(checke_symbol_price['quantity']) > 2.50:
-            print(f"Balance in account {checke_symbol_price['quantity']}")
-            return_buy['quantity'] = checke_symbol_price['quantity']
-            break
 
         print(f"Balance in account {checke_symbol_price['quantity']}")
         t.sleep(3)
 
         list_of_tickers = client.get_all_tickers()
         current_symbolPrice = get_price_current(list_of_tickers, symbolTicker)
+        price_current_BTCUSDT = (current_symbolPrice*float(checke_symbol_price['quantity']))
+
+
+        if price_current_BTCUSDT > 12.00:
+            print(f"Balance in account {checke_symbol_price['quantity']}")
+            return_buy['quantity'] = checke_symbol_price['quantity']
+            break
 
         print("    Prev Price = " + str(prev_symbolPrice))
         print(" Current Price = " + str(current_symbolPrice))

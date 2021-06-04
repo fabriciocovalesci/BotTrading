@@ -190,7 +190,7 @@ while True:
         else:
             print("Creasing")
 
-        if ( symbolPrice < ma50*0.999 ):
+        if ( symbolPrice < ma50*0.995 ):
             print("DINAMIC_BUY")
             
             try:

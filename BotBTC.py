@@ -8,7 +8,7 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 from helpers_btc import *
-from Connect_PostgreSQL import Buy, Sell, Reports
+from Connect_PostgreSQL_BTC import Buy, Sell, Reports
 from Email import Gmail
 
 dotenv_path = join(dirname(__file__), '.env')

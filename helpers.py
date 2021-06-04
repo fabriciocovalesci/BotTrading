@@ -344,7 +344,6 @@ def Dinamic_Buy(symbolTicker: str, symbolBase: str, client: object, percentePric
                     orderId = buyOrder['orderId']
                 )
 
-                quantityBuy = calculate_quantity_buy(symbolTicker, client, min_buy, max_buy)
                 priceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceBUY, decimal_places)
                 stopPriceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceStopBUY, decimal_places)
                 quantityBuy = calculate_quantity_buy(symbolTicker, client, min_buy, max_buy)

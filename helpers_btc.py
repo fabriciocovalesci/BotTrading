@@ -5,7 +5,7 @@ import math
 import time as t
 from datetime import datetime, timezone
 
-decimal_places = 8
+decimal_places = 6
 amount_buy_usdt_to_btc = 120.00
 
 def calculate_ma50(symbolTicker, client):
@@ -454,7 +454,7 @@ def quantity_bitcoin(crypto, client, amount_buy_usdt):
         current_price = client.get_symbol_ticker(symbol=crypto)
         get_price = float(current_price['price'])
         satoshi = amount_buy_usdt / get_price * 100000000
-        quantity_btc = round(float(satoshi / 100000000), 8)
+        quantity_btc = round(float(satoshi / 100000000), 6)
         return quantity_btc
     except BinanceAPIException as error:
         print(f"Error calculate quantity of bitcoin {error}")

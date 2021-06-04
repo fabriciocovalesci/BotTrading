@@ -5,8 +5,10 @@ from datetime import datetime, timezone
 import numpy as np
 import math
 import os
+from satoshi import *
 from os.path import join, dirname
 from dotenv import load_dotenv
+import satoshi
 from helpers_btc import *
 from Connect_PostgreSQL_BTC import Buy, Sell, Reports
 from Email import Gmail
@@ -52,7 +54,7 @@ Reports_DataBase = Reports()
 Send_Email = Gmail(GMAIL_EMAIL, GMAIL_PASSWORD)
 
 # decimal places
-decimal_places = 8
+decimal_places = 6
 
 now = datetime.now()
 
@@ -73,9 +75,11 @@ while True:
         continue
 
     symbolPrice_current = get_price_current(list_of_tickers, symbolTicker)
-    price_current_XRPUSDT = (symbolPrice_current*float(checke_symbol_price['quantity']))
+    price_current_BTCUSDT = (symbolPrice_current*float(checke_symbol_price['quantity']))
 
-    if len(Reports_DataBase.select_report_lastest()) != 0 and checke_symbol_price['status'] == True and round(float(price_current_XRPUSDT), decimal_places) >= 10.50:
+    value_usd_current = satoshi.to_fiat(float(checke_symbol_price['quantity']) * 100000000, fiat='USD')
+
+    if len(Reports_DataBase.select_report_lastest()) != 0 and checke_symbol_price['status'] == True and round(float(price_current_BTCUSDT), decimal_places) >= 10.50:
 
         t.sleep(15)
 
@@ -147,12 +151,12 @@ while True:
                     myfile.write(str(now.strftime("%d-%m-%y %H:%M:%S")) +" - an exception occured - {}".format(e)+ " Oops 3 ! \n")
                 client = Client(API_KEY, API_SECRET, tld='com')
                 continue
-            
-    elif float(checke_symbol_price['quantity']) < 3.00:
-        print(f"No account balance {checke_symbol_price['quantity']}")
+
+    elif (value_usd_current < 12.00):
+        print(f"No account balance {value_usd_current} USDT")
+        
         t.sleep(15)
         
-            
         get_price = client.get_asset_balance(asset=symbolBase)
         
         symbolPrice = get_price_current(list_of_tickers, symbolTicker)
@@ -230,6 +234,3 @@ while True:
                         orderId=orders[0].get('orderId'))
 
                 continue
-
-
-

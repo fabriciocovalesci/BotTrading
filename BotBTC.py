@@ -5,10 +5,9 @@ from datetime import datetime, timezone
 import numpy as np
 import math
 import os
-from satoshi import *
+import satoshi
 from os.path import join, dirname
 from dotenv import load_dotenv
-import satoshi
 from helpers_btc import *
 from Connect_PostgreSQL_BTC import Buy, Sell, Reports
 from Email import Gmail
@@ -36,12 +35,14 @@ symbolBase = 'BTC'
 ma50 = 0
 auxPrice = 0.0
 
+amount_buy_usdt_to_btc = 50.00
+
 # Percente For Buy
 percentePriceBUY = 1.0055
 percentePriceStopBUY = 1.005
 
 # Percente For Sell
-percentagePriceSELL = 1.03
+percentagePriceSELL = 1.05
 # percentageStopPriceSELL = 0.999 #0.992
 # percentagestopLimitPriceSELL = 1.02 #0.99 
 
@@ -108,18 +109,17 @@ while True:
             try:
                 client = Client(API_KEY, API_SECRET, tld='com')
                 dict_info = get_priceBuy_Quantity(Reports_DataBase.select_report_lastest())
+
+                quantity_sell_btc = quantity_bitcoin(symbolTicker, client, float(dict_info['quantity']))
                
-                return_sell = SELL_MARKET(symbolTicker, round_down(dict_info['quantity']), client)
+                return_sell = SELL_MARKET(symbolTicker, quantity_sell_btc, client)
 
                 price_buy = float(dict_info['price_buy'])
                 quantitySell = float(return_sell['executedQty'])
-                quantityBuy_profit = float(dict_info['quantity'])
-
-                # get_order_sell_status = client.get_order(symbol=symbolTicker,orderId=return_sell['orderId'])
 
                 priceSell = float(return_sell['fills'][0]['price'])
 
-                profit = round(float(abs((priceSell*quantitySell) - (price_buy*quantityBuy_profit))), decimal_places)
+                profit = round(float(abs((priceSell*quantitySell) - (price_buy*quantity_sell_btc))), 2)
 
                 id_report = getId_data_base(Reports_DataBase.select_report_lastest())
 
@@ -191,32 +191,33 @@ while True:
             print("Creasing")
 
         if ( symbolPrice < ma50*0.995 ):
-            print("DINAMIC_BUY")
+            print("____ STARTING BITCOIN PURCHASE ____")
             
             try:
                 client = Client(API_KEY, API_SECRET, tld='com')
-                return_buy = Dinamic_Buy_Bitcoin(symbolTicker, symbolBase, client, percentePriceBUY, percentePriceStopBUY)
 
-                list_of_tickers = client.get_all_tickers()
-                current_price_buy = get_price_current(list_of_tickers, symbolTicker)
+                quantity_buy_bitcoin = quantity_bitcoin(symbolTicker, client, amount_buy_usdt_to_btc)
+                return_buy = market_buy(client, symbolTicker, quantity_buy_bitcoin)
 
-                symbolPrice = float(return_buy['amount_buy'])
-                quantity_buy_insert = float(return_buy['quantity'])
+                price_bitcoin_buy = float(return_buy['fills'][0]['price'])
                 
-                report_buy_db = (symbolPrice, 0.0, 0.0, quantity_buy_insert, symbolTicker, datetime.now(), False)
+                value_usdt_buy = float(quantity_buy_bitcoin) * price_bitcoin_buy
+
+                report_buy_db = (price_bitcoin_buy, 0.0, 0.0, value_usdt_buy, symbolTicker, datetime.now(), False)
                 Reports_DataBase.insert_report(report_buy_db)
 
                 id_report = getId_data_base(Reports_DataBase.select_report_lastest()) 
 
                 date_buy = datetime.now(timezone.utc)
-                order_id = return_buy['order_id']
+                order_id = return_buy['orderId']
 
-                buy_tuple_db = (symbolPrice, date_buy, quantity_buy_insert ,order_id, symbolPrice, symbolTicker, symbolBase, id_report)
+
+                buy_tuple_db = (price_bitcoin_buy, date_buy, value_usdt_buy ,order_id, price_bitcoin_buy, symbolTicker, symbolBase, id_report)
                 Buy_DataBase.insert_buy(buy_tuple_db)
 
                 t.sleep(3)
 
-                body_email_for_buy = body_email_buy(symbolTicker=symbolTicker, price_current=current_price_buy, price_buy=symbolPrice, percentagePriceSELL=percentagePriceSELL, quantity_buy=quantity_buy_insert)
+                body_email_for_buy = body_email_buy(symbolTicker=symbolTicker, price_current=price_bitcoin_buy, price_buy=price_bitcoin_buy, percentagePriceSELL=percentagePriceSELL, quantity_buy=quantity_buy_bitcoin)
 
                 Send_Email.send_email("Success Buy", body_email_for_buy)
 

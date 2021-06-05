@@ -6,7 +6,7 @@ import time as t
 from datetime import datetime, timezone
 
 decimal_places = 6
-amount_buy_usdt_to_btc = 120.00
+amount_buy_usdt_to_btc = 20
 
 def calculate_ma50(symbolTicker, client):
     ma50_local = 0
@@ -485,7 +485,6 @@ def Dinamic_Buy_Bitcoin(symbolTicker: str, symbolBase: str, client: object, perc
     try:
         list_of_tickers = client.get_all_tickers()
         prev_symbolPrice = get_price_current(list_of_tickers, symbolTicker)
-        quantityBuy = quantity_bitcoin(symbolTicker, client, amount_buy_usdt_to_btc)
         priceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceBUY, decimal_places)
         stopPriceBuy = format_Price_decimal_percente(prev_symbolPrice, percentePriceStopBUY, decimal_places)
 
@@ -519,13 +518,13 @@ def Dinamic_Buy_Bitcoin(symbolTicker: str, symbolBase: str, client: object, perc
         current_symbolPrice = get_price_current(list_of_tickers, symbolTicker)
         price_current_BTCUSDT = (current_symbolPrice*float(checke_symbol_price['quantity']))
 
-        print(f"Balance in account {price_current_BTCUSDT}")
+        print(f"Balance in account {round(price_current_BTCUSDT, 6)}")
 
         t.sleep(3)
 
         if price_current_BTCUSDT > 12.00:
-            print(f"Balance in account {checke_symbol_price['quantity']}")
-            return_buy['quantity'] = checke_symbol_price['quantity']
+            print(f"Balance in account buy {round(checke_symbol_price['quantity'],6)}")
+            return_buy['quantity'] = round(checke_symbol_price['quantity'],6)
             break
 
         print("    Prev Price = " + str(prev_symbolPrice))
@@ -535,10 +534,7 @@ def Dinamic_Buy_Bitcoin(symbolTicker: str, symbolBase: str, client: object, perc
 
             try:
 
-                result = client.cancel_order(
-                    symbol = symbolTicker,
-                    orderId = buyOrder['orderId']
-                )
+                result = client.cancel_order(symbol= symbolTicker, orderId = buyOrder['orderId'])
 
                 priceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceBUY, decimal_places)
                 stopPriceBuy = format_Price_decimal_percente(current_symbolPrice, percentePriceStopBUY, decimal_places)
@@ -567,3 +563,21 @@ def Dinamic_Buy_Bitcoin(symbolTicker: str, symbolBase: str, client: object, perc
 
     print(f"{symbolTicker} purchased value {prev_symbolPrice}")
     return return_buy
+
+
+def market_buy(client, symbol, quantity_btc):
+    """This function executes a Bitcoin market buy order
+
+    Args:
+        client (Object):  Binance instance client
+        symbol (string): cryptocurrency par symbol. Ex: BTCUSDT
+        quantity_btc (float): Quantity in satoshi
+
+    Returns:
+        [dict]: Return a purchase order
+    """
+    try:
+        order = client.order_market_buy(symbol=symbol, quantity=quantity_btc)
+        return order
+    except BinanceAPIException as error:
+        print(f"Error market buy bitcoin {error}")
